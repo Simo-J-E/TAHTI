@@ -28,7 +28,7 @@ export default function Landing() {
       <main>
         <section className="mx-auto grid max-w-6xl gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:py-24">
           <div className="max-w-xl">
-            <p className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
+            <p className="mb-4 font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[var(--tahti-brand-text)]">
               {t("hero.eyebrow")}
             </p>
             <h1 className="max-w-[11ch] text-5xl font-black uppercase leading-[0.92] tracking-[-0.05em] sm:text-6xl lg:text-7xl">
@@ -49,7 +49,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div
+          <section
             className="overflow-hidden rounded-[var(--tahti-radius-lg)] border border-[var(--color-border-alpha-50)] bg-[var(--color-surface)] shadow-[0_16px_50px_rgba(0,0,0,0.12)]"
             aria-label={t("preview.label")}
           >
@@ -95,7 +95,7 @@ export default function Landing() {
                 ))}
               </div>
             </div>
-          </div>
+          </section>
         </section>
 
         <section className="border-y border-[var(--color-border-alpha-30)] bg-[var(--color-surface-alpha-40)]">

@@ -22,10 +22,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           package-manager-cache: false
@@ -63,6 +63,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Browser and axe smoke tests
+        env:
+          VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
         run: npm run test:e2e
 
       - name: Upload Pages artifact

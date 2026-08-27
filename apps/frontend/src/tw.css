@@ -480,10 +480,12 @@
   --tahti-radius-md: 8px;
   --tahti-radius-lg: 12px;
   --tahti-focus: #ff9b86;
+  --tahti-brand-text: rgb(154, 58, 43);
 }
 
 :root[data-appearance="dark"] {
   color-scheme: dark;
+  --tahti-brand-text: rgb(255, 155, 134);
   --color-background: rgb(18, 21, 27);
   --color-surface: rgb(26, 30, 38);
   --color-surface-secondary: rgb(36, 42, 52);
@@ -497,6 +499,7 @@
 
 :root[data-appearance="light"] {
   color-scheme: light;
+  --tahti-brand-text: rgb(154, 58, 43);
   --color-background: rgb(246, 244, 239);
   --color-surface: rgb(255, 253, 249);
   --color-surface-secondary: rgb(235, 232, 225);
