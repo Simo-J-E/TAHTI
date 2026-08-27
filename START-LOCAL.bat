@@ -2,7 +2,7 @@
 setlocal
 
 where node >nul 2>nul || (
-  echo Node.js 20 or newer is required.
+  echo Node.js 24 or newer is required.
   exit /b 1
 )
 

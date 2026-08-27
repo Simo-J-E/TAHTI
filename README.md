@@ -50,7 +50,7 @@ Quality tooling:
 
 ### Frontend
 
-Requirements: Node.js 20+ (Node 22 is used in CI).
+Requirements: Node.js 24+ (Node 24 is used in CI/CD).
 
 ```bash
 npm install
@@ -91,6 +91,20 @@ https://lukkari-api.juh.fi
 
 ## GitHub Pages deployment
 
+### One-time repository setup
+
+Before the first deployment, enable GitHub Pages for the repository:
+
+1. Open the repository on GitHub.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+4. Re-run **Deploy GitHub Pages** from the Actions tab, or push another commit to `main`.
+
+GitHub requires this repository-level Pages setting before `actions/configure-pages` and `actions/deploy-pages` can deploy using the normal `GITHUB_TOKEN`. No personal access token is required for the normal workflow.
+
+The workflows use Node.js 24 and Node-24-compatible action releases (`checkout@v6`, `setup-node@v6`, `configure-pages@v6`, `upload-pages-artifact@v5`, and `deploy-pages@v5`).
+
+
 1. Create a GitHub repository.
 2. Upload/push this repository.
 3. Open **Settings → Pages**.
@@ -99,13 +113,13 @@ https://lukkari-api.juh.fi
 
 `.github/workflows/pages.yml` then:
 
-1. installs dependencies with `npm ci`
+1. installs dependencies with `npm install --no-audit --no-fund`
 2. checks Prettier
 3. runs ESLint
 4. runs TypeScript checks for frontend and backend
 5. runs Vitest
 6. runs repository standards checks
-7. builds with the correct `/<repository>/` Vite base path
+7. builds with the base path reported by GitHub Pages (repository path, root site, or custom domain)
 8. runs Playwright + axe smoke tests
 9. uploads `apps/frontend/dist`
 10. deploys the artifact to GitHub Pages

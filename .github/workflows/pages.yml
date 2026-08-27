@@ -20,20 +20,21 @@ jobs:
     name: Verify and build
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      VITE_BASE_PATH: /${{ github.event.repository.name }}/
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
+          package-manager-cache: false
 
+      # GitHub Pages must be enabled once in:
+      # Settings -> Pages -> Build and deployment -> Source -> GitHub Actions.
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        id: pages
+        uses: actions/configure-pages@v6
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
@@ -54,6 +55,8 @@ jobs:
         run: npm run standards
 
       - name: Build GitHub Pages artifact
+        env:
+          VITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
         run: npm run build
 
       - name: Install Playwright Chromium
@@ -63,12 +66,15 @@ jobs:
         run: npm run test:e2e
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: apps/frontend/dist
 
   deploy:
     name: Deploy
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -78,4 +84,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
