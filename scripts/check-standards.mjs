@@ -5,6 +5,17 @@ import path from "node:path";
 const root = process.cwd();
 const failures = [];
 
+const ignoredDirectories = new Set([
+  ".git",
+  ".vite",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+  "playwright-report",
+  "test-results",
+]);
+
 function packageNameFromSpecifier(specifier) {
   if (specifier.startsWith("@")) {
     return specifier.split("/").slice(0, 2).join("/");
@@ -139,6 +150,8 @@ async function walk(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
+    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
+
     const full = path.join(directory, entry.name);
     if (entry.isDirectory()) files.push(...(await walk(full)));
     else files.push(full);
