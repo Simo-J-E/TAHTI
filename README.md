@@ -104,7 +104,6 @@ GitHub requires this repository-level Pages setting before `actions/configure-pa
 
 The workflows use Node.js 24 and Node-24-compatible action releases (`checkout@v6`, `setup-node@v6`, `configure-pages@v6`, `upload-pages-artifact@v5`, and `deploy-pages@v5`).
 
-
 1. Create a GitHub repository.
 2. Upload/push this repository.
 3. Open **Settings → Pages**.
