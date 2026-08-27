@@ -9,6 +9,8 @@ const requiredFiles = [
   ".github/workflows/pages.yml",
   ".prettierrc.json",
   "eslint.config.mjs",
+  "apps/frontend/vitest.config.ts",
+  "apps/frontend/playwright.config.ts",
   "apps/frontend/public/brand/tahti-symbol.svg",
   "apps/frontend/public/brand/tahti-logo.svg",
 ];
@@ -44,6 +46,18 @@ for (const command of [
   if (!pagesWorkflow.includes(command)) {
     failures.push(`pages.yml: missing quality/deployment command ${command}`);
   }
+}
+
+
+const vitestConfig = await readFile(
+  path.join(root, "apps/frontend/vitest.config.ts"),
+  "utf8",
+);
+if (!vitestConfig.includes('"@": path.resolve(configDirectory, "./src")')) {
+  failures.push("vitest.config.ts: missing @ -> src alias used by application imports");
+}
+if (!vitestConfig.includes('include: ["src/**/*.{test,spec}.{ts,tsx}"]')) {
+  failures.push("vitest.config.ts: unit test include must keep Playwright e2e specs out of Vitest");
 }
 
 const htmlFiles = [
