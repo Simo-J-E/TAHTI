@@ -1,0 +1,877 @@
+import { addDays, startOfWeek } from "date-fns";
+import { Calendar, Clock, Eye, EyeOff, Palette, Pencil } from "lucide-react";
+import { memo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { RealizationColorCustomizer } from "@/components/RealizationColorCustomizer";
+import { cn } from "@/lib/utils";
+import {
+  SCHEDULE_LAYOUT,
+  START_HOUR,
+  WEEK_HOUR_HEIGHT,
+} from "../../constants/schedule-layout-constants";
+import { useCurrentTime } from "../../hooks/useCurrentTime";
+import { useColorCustomizerDialogParam } from "../../hooks/useDialogParams";
+import { useEventDetailsDialog } from "../../hooks/useEventDetailsDialog";
+import { useRealizationDialog } from "../../hooks/useRealizationDialog";
+import { RealizationApiService } from "../../services/realizationApi";
+import { isCustomScheduleEventId } from "../../state/schedule-store";
+import {
+  default as useConfigStore,
+  useEventMetadataStore,
+  useRealizationMetadataStore,
+  useScheduleStore,
+} from "../../state/state-management";
+import type { ScheduleEvent } from "../../types/schedule";
+import { DateFormatUtils } from "../../utils/date-format-utils";
+import { ScheduleLayoutUtils } from "../../utils/schedule-layout-utils";
+import { ScheduleUtils } from "../../utils/schedule-utils";
+import { CalendarViewBadge } from "../CalendarViewBadge";
+import EventDetailsDialog from "../EventDetailsDialog";
+import { LastUpdatedBadge } from "../LastUpdatedBadge";
+import { Ptivis25Notice } from "../Ptivis25Notice";
+import RealizationDialog from "../RealizationDialog";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "../ui/context-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+
+interface WeekViewProps {
+  currentDate: Date;
+  setViewMode: (mode: "day" | "week" | "month") => void;
+  lastUpdatedLabel?: string | null;
+  isCheckingHash?: boolean;
+  isFetchingCalendar?: boolean;
+  hasError?: boolean;
+}
+
+const WeekView = memo(
+  ({
+    currentDate,
+    lastUpdatedLabel,
+    isCheckingHash,
+    isFetchingCalendar,
+    hasError,
+  }: WeekViewProps) => {
+    const { t } = useTranslation("schedule");
+    const { t: tColor } = useTranslation("colorCustomization");
+
+    const getWeekStart = (date: Date) => {
+      return startOfWeek(date, { weekStartsOn: 1 }); // Monday
+    };
+
+    const getWeekDates = (date: Date) => {
+      const weekStart = getWeekStart(date);
+      return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+    };
+
+    const {
+      addCustomEvent,
+      clearCustomEvents,
+      getEventsForWeek,
+      getEventById,
+    } = useScheduleStore();
+    const { config, isCurrentThemeLight } = useConfigStore();
+    const { metadataByRealization, isRealizationHidden } =
+      useRealizationMetadataStore();
+    const { metadataByEvent, isEventHidden, setEventHidden } =
+      useEventMetadataStore();
+
+    const [colorEventId, setColorEventId] = useColorCustomizerDialogParam();
+    // Generate additional events for quick testing
+    const generateAdditionalEvents = (count = 30, weekDates: Date[]) => {
+      const filteredWeekDates = weekDates;
+      if (filteredWeekDates.length === 0) return;
+      const durations = [0.5, 1, 1.5, 2];
+      for (let i = 0; i < count; i++) {
+        const date =
+          filteredWeekDates[
+            Math.floor(Math.random() * filteredWeekDates.length)
+          ];
+        // random start between START_HOUR and START_HOUR+11 (half-hour steps)
+        const hourSlot = Math.floor(Math.random() * 12);
+        const half = Math.random() < 0.5 ? 0 : 0.5;
+        const startHour = START_HOUR + hourSlot + half;
+        const duration =
+          durations[Math.floor(Math.random() * durations.length)];
+        const startTime = new Date(date);
+        const startHourFloor = Math.floor(startHour);
+        const startMinutes = Math.round((startHour - startHourFloor) * 60);
+        startTime.setHours(startHourFloor, startMinutes, 0, 0);
+        const endTime = new Date(
+          startTime.getTime() + duration * 60 * 60 * 1000,
+        );
+
+        addCustomEvent({
+          title: `Additional ${i + 1}`,
+          location: i % 3 === 0 ? `Room ${100 + (i % 10)}` : undefined,
+          startTime,
+          endTime,
+          source: "additional",
+        });
+      }
+    };
+
+    const clearAdditionalEvents = () =>
+      clearCustomEvents({ source: "additional" });
+
+    const getDisplayTitle = (title: string) =>
+      config.showCourseIdInSchedule
+        ? title
+        : RealizationApiService.stripRealizationCode(title);
+
+    const getEventDisplayName = (event: ScheduleEvent) =>
+      metadataByEvent[event.id]?.name || event.title;
+    const getEventLocation = (event: ScheduleEvent) =>
+      metadataByEvent[event.id]?.location || event.location;
+
+    // Realization dialog hook
+    const {
+      isOpen: realizationDialogOpen,
+      isLoading: realizationLoading,
+      error: realizationError,
+      realizationData,
+      openDialog: openRealizationDialog,
+      openDialogByCode: openRealizationDialogByCode,
+      closeDialog: closeRealizationDialog,
+    } = useRealizationDialog();
+
+    // Event details dialog hook
+    const {
+      isOpen: eventDetailsDialogOpen,
+      selectedEvent,
+      openDialog: openEventDetailsDialog,
+      closeDialog: closeEventDetailsDialog,
+    } = useEventDetailsDialog();
+
+    // Helper functions for color customization
+    const openColorCustomizer = (event: ScheduleEvent) => {
+      setColorEventId(event.id);
+    };
+
+    const weekStart = getWeekStart(currentDate);
+    const weekDates = getWeekDates(currentDate);
+    const weekEvents = getEventsForWeek(weekStart);
+    const visibleWeekEvents = config.allowCustomEvents
+      ? weekEvents
+      : Object.fromEntries(
+          Object.entries(weekEvents).map(([dateKey, dayEvents]) => [
+            dateKey,
+            dayEvents.filter((event) => !isCustomScheduleEventId(event.id)),
+          ]),
+        );
+    const selectedEventForColor = colorEventId
+      ? getEventById(colorEventId)
+      : null;
+
+    useEffect(() => {
+      if (colorEventId && !selectedEventForColor) {
+        setColorEventId(null);
+      }
+    }, [colorEventId, selectedEventForColor, setColorEventId]);
+
+    // Filter dates and events based on showWeekends config
+    // Always show weekends if they have events, regardless of setting
+    const hasWeekendEvents = weekDates.some((date) => {
+      const dayOfWeek = date.getDay();
+      const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday (0) or Saturday (6)
+      if (!isWeekend) return false;
+
+      const dateString = date.toDateString();
+      const eventsForDay = visibleWeekEvents[dateString] || [];
+      return eventsForDay.length > 0;
+    });
+
+    const shouldShowWeekends = config.showWeekends || hasWeekendEvents;
+
+    const filteredWeekDates = shouldShowWeekends
+      ? weekDates
+      : weekDates.filter((date) => {
+          const dayOfWeek = date.getDay();
+          return dayOfWeek !== 0 && dayOfWeek !== 6; // Exclude Sunday (0) and Saturday (6)
+        });
+
+    const filteredWeekEvents = shouldShowWeekends
+      ? visibleWeekEvents
+      : Object.fromEntries(
+          Object.entries(visibleWeekEvents).filter(([dateString]) => {
+            const date = new Date(dateString);
+            const dayOfWeek = date.getDay();
+            return dayOfWeek !== 0 && dayOfWeek !== 6; // Exclude Sunday (0) and Saturday (6)
+          }),
+        );
+
+    const filteredDayNames =
+      DateFormatUtils.getDayNamesShort(shouldShowWeekends);
+
+    // Precompute event column layout per day so overlapping events are shown side-by-side.
+    // We group events into overlapping clusters (transitive overlap), then assign columns
+    // inside each cluster with a greedy placement algorithm. Each event gets {col, cols}.
+    const eventLayoutByDate: Record<
+      string,
+      Record<string, { col: number; cols: number }>
+    > = {};
+    filteredWeekDates.forEach((date) => {
+      const dateString = date.toDateString();
+      const events = (filteredWeekEvents[dateString] || []).slice(); // copy
+
+      // Sort by start time (earlier start first). If equal, longer duration first
+      events.sort(
+        (a, b) => a.startHour - b.startHour || b.duration - a.duration,
+      );
+
+      const clusters: Array<typeof events> = [];
+      let currentCluster: typeof events = [];
+      let clusterEnd = -Infinity;
+
+      events.forEach((ev) => {
+        const evEnd = ev.startHour + ev.duration;
+        if (currentCluster.length === 0) {
+          currentCluster.push(ev);
+          clusterEnd = evEnd;
+        } else if (ev.startHour < clusterEnd) {
+          // overlaps current cluster
+          currentCluster.push(ev);
+          clusterEnd = Math.max(clusterEnd, evEnd);
+        } else {
+          clusters.push(currentCluster);
+          currentCluster = [ev];
+          clusterEnd = evEnd;
+        }
+      });
+      if (currentCluster.length) clusters.push(currentCluster);
+
+      const mapping: Record<string, { col: number; cols: number }> = {};
+
+      clusters.forEach((cluster) => {
+        // greedy column assignment for this cluster
+        const columnEnds: number[] = [];
+
+        cluster.forEach((ev) => {
+          const evEnd = ev.startHour + ev.duration;
+          let placed = false;
+          for (let i = 0; i < columnEnds.length; i++) {
+            if (ev.startHour >= columnEnds[i]) {
+              mapping[ev.id] = { col: i, cols: 0 };
+              columnEnds[i] = evEnd;
+              placed = true;
+              break;
+            }
+          }
+          if (!placed) {
+            const idx = columnEnds.length;
+            columnEnds.push(evEnd);
+            mapping[ev.id] = { col: idx, cols: 0 };
+          }
+        });
+
+        const total = Math.max(1, columnEnds.length);
+        cluster.forEach((ev) => {
+          mapping[ev.id].cols = total;
+        });
+      });
+
+      eventLayoutByDate[dateString] = mapping;
+    });
+
+    // Calculate the time range for the week
+    const timeSlots =
+      ScheduleLayoutUtils.generateWeekTimeSlots(filteredWeekEvents);
+    const totalEventsThisWeek = Object.values(filteredWeekEvents).reduce(
+      (sum, dayEvents) => sum + dayEvents.length,
+      0,
+    );
+
+    // Current time indicator
+    const currentTime = useCurrentTime();
+    const currentTimeInHours =
+      DateFormatUtils.getCurrentTimeInHours(currentTime);
+    const currentTimeString = DateFormatUtils.getCurrentTimeString(currentTime);
+    const weekGridHeight = timeSlots.length * WEEK_HOUR_HEIGHT;
+    const currentTimePosition =
+      (currentTimeInHours - START_HOUR) * WEEK_HOUR_HEIGHT;
+    const showCurrentTimeIndicator =
+      filteredWeekDates.some((date) => DateFormatUtils.isToday(date)) &&
+      weekGridHeight > 0 &&
+      currentTimePosition >= 0 &&
+      currentTimePosition <= weekGridHeight;
+    const currentTimeIndicatorPosition = showCurrentTimeIndicator
+      ? currentTimePosition
+      : 0;
+
+    // Format week header
+    const formatWeekHeader = () => {
+      const startDate = filteredWeekDates[0];
+      const endDate = filteredWeekDates[filteredWeekDates.length - 1];
+      return DateFormatUtils.formatWeekHeader(startDate, endDate);
+    };
+
+    // Format week indicator with hours
+    const allWeekEvents = Object.values(filteredWeekEvents).flat();
+    const eventById = new Map(allWeekEvents.map((event) => [event.id, event]));
+    const isEventEffectivelyHidden = (eventId: string) => {
+      const event = eventById.get(eventId);
+      const override = metadataByEvent[eventId]?.hidden;
+      if (typeof override === "boolean") {
+        return override;
+      }
+      if (!event) {
+        return isEventHidden(eventId);
+      }
+      const attachedRealizationId =
+        metadataByEvent[eventId]?.attachedRealizationId ?? null;
+      const realizationCode = RealizationApiService.getEffectiveRealizationCode(
+        getEventDisplayName(event),
+        attachedRealizationId,
+      );
+      return Boolean(realizationCode && isRealizationHidden(realizationCode));
+    };
+    const toggleEventVisibility = (event: ScheduleEvent) => {
+      const nextHidden = !isEventEffectivelyHidden(event.id);
+      setEventHidden(event.id, nextHidden);
+    };
+
+    const hasTimeOverrideChange = (event: ScheduleEvent) => {
+      const override = metadataByEvent[event.id]?.time;
+      if (!override) {
+        return false;
+      }
+      const originalStart = new Date(override.originalStartTimeIso);
+      const originalEnd = new Date(override.originalEndTimeIso);
+      return (
+        event.startTime.getTime() !== originalStart.getTime() ||
+        event.endTime.getTime() !== originalEnd.getTime()
+      );
+    };
+    const formatWeekIndicator = () => {
+      return DateFormatUtils.formatWeekIndicator(
+        DateFormatUtils.getWeekNumber(currentDate),
+        allWeekEvents,
+        isEventEffectivelyHidden,
+        config.showTotalHours,
+      );
+    };
+
+    return (
+      <TooltipProvider delayDuration={350} disableHoverableContent>
+        <div className="w-full h-full flex flex-col">
+          {/* Week Header */}
+          <div className="w-full flex-shrink-0 bg-[linear-gradient(to_bottom,var(--color-surface-alpha-40),transparent)]">
+            <Ptivis25Notice />
+            <div className="max-w-7xl mx-auto px-4 py-6 relative">
+              <div className="absolute left-4 top-4 md:hidden">
+                <CalendarViewBadge variant="icon-only" />
+              </div>
+              {lastUpdatedLabel && (
+                <div className="absolute right-4 top-4 md:hidden">
+                  <LastUpdatedBadge
+                    lastUpdatedLabel={lastUpdatedLabel}
+                    variant="icon-only"
+                    isCheckingHash={isCheckingHash}
+                    isFetchingCalendar={isFetchingCalendar}
+                    hasError={hasError}
+                  />
+                </div>
+              )}
+              <div className="text-center">
+                <div className="text-sm mb-1 text-muted-foreground">
+                  {t("weekView.week")} {formatWeekIndicator()}
+                </div>
+                <h2 className="text-2xl font-medium text-foreground">
+                  {formatWeekHeader()}
+                </h2>
+              </div>
+              {/* Desktop badges - Stacked vertically on the right */}
+              <div className="hidden md:flex flex-col items-end gap-2 absolute right-4 bottom-4">
+                {lastUpdatedLabel && (
+                  <LastUpdatedBadge
+                    lastUpdatedLabel={lastUpdatedLabel}
+                    variant="full"
+                    isCheckingHash={isCheckingHash}
+                    isFetchingCalendar={isFetchingCalendar}
+                    hasError={hasError}
+                  />
+                )}
+                <CalendarViewBadge variant="full" />
+              </div>
+              {/* Additional event controls */}
+              {config.devToolsEnableEventGenerator && (
+                <div className="hidden md:flex absolute right-4 top-4 gap-2">
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-xs border rounded"
+                    onClick={() => generateAdditionalEvents(30, weekDates)}
+                  >
+                    Add additional events
+                  </button>
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-xs border rounded"
+                    onClick={clearAdditionalEvents}
+                  >
+                    Clear additional
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Week Container */}
+          <div className="flex-1 flex flex-col max-w-7xl mx-auto w-full">
+            <div className="flex-1 flex flex-col px-4">
+              {totalEventsThisWeek === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center min-h-96 text-muted-foreground">
+                  <Calendar size={48} className="mb-4 opacity-50" />
+                  <p className="text-lg font-medium">
+                    {t("weekView.noEvents")}
+                  </p>
+                  <p className="text-sm opacity-75 mt-1 text-center">
+                    {t("weekView.noEventsDescription")}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex-1 relative overflow-x-auto">
+                  {/* Week Grid */}
+                  <div
+                    style={{
+                      minWidth: config.squeezeWeekOnMobile
+                        ? "auto"
+                        : `${Math.max(320, filteredWeekDates.length * 100 + 48)}px`,
+                    }}
+                  >
+                    {/* Day Headers */}
+                    <div className="sticky top-0 z-50 bg-[var(--color-surface)]">
+                      <div className="flex">
+                        <div className="w-12 flex-shrink-0 border-r border-[var(--color-border-alpha-30)]"></div>
+                        {filteredWeekDates.map((date, index) => {
+                          const isToday =
+                            date.toDateString() === new Date().toDateString();
+                          const isLight = isCurrentThemeLight();
+                          return (
+                            <div
+                              key={date.toDateString()}
+                              className={cn(
+                                "flex-1 p-2 text-center border-r border-[var(--color-border-alpha-30)] last:border-r-0",
+                                config.squeezeWeekOnMobile ? "" : "min-w-24",
+                                isToday
+                                  ? "bg-[var(--color-header-accent)]"
+                                  : isLight
+                                    ? "bg-[var(--color-accent-alpha-20)]"
+                                    : "bg-transparent",
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "text-xs font-medium",
+                                  isToday
+                                    ? "text-white"
+                                    : "text-muted-foreground",
+                                )}
+                              >
+                                {filteredDayNames[index]}
+                              </div>
+                              <div
+                                className={cn(
+                                  "text-sm font-bold mt-1",
+                                  isToday ? "text-white" : "text-foreground",
+                                )}
+                              >
+                                {date.getDate()}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Time Grid */}
+                    <div className="relative">
+                      {/* Current Time Indicator */}
+                      {showCurrentTimeIndicator && (
+                        <div
+                          className="absolute w-full z-40"
+                          style={{
+                            top: `${currentTimeIndicatorPosition}px`,
+                            left: "0",
+                            right: "0",
+                          }}
+                        >
+                          {/* Time label */}
+                          <div className="absolute left-0 top-0 transform -translate-y-1/2 bg-red-500 text-white text-xs px-2 py-1 rounded-md font-medium shadow-sm flex items-center gap-1 z-40 [text-shadow:0_1px_2px_rgba(0,0,0,0.8)]">
+                            <Clock size={10} />
+                            {currentTimeString}
+                          </div>
+                          {/* Line spanning all days */}
+                          <div className="absolute left-12 top-0 right-0 h-0.5 bg-red-500 shadow-sm z-30"></div>
+                        </div>
+                      )}
+
+                      {timeSlots.map((time, timeIndex) => (
+                        <div
+                          key={time}
+                          className="flex relative"
+                          style={{
+                            borderColor: isCurrentThemeLight()
+                              ? "var(--color-border-alpha-50)"
+                              : "var(--color-border-alpha-30)",
+                            borderBottomWidth: isCurrentThemeLight()
+                              ? "1.5px"
+                              : "1px",
+                            borderBottomStyle: "solid",
+                            minHeight: `${WEEK_HOUR_HEIGHT}px`,
+                          }}
+                        >
+                          {/* Half-hour dashed line */}
+                          <div
+                            className={
+                              isCurrentThemeLight()
+                                ? "absolute left-0 right-0 opacity-100"
+                                : "absolute left-0 right-0 opacity-75"
+                            }
+                            style={{
+                              borderColor: "var(--color-border-alpha-30)",
+                              borderTopWidth: "1px",
+                              borderTopStyle: "dashed",
+                              top: `${WEEK_HOUR_HEIGHT / 2}px`,
+                              zIndex: 5,
+                            }}
+                          />
+
+                          <div className="w-12 flex-shrink-0 p-2 text-xs font-medium border-r border-[var(--color-border-alpha-30)] text-muted-foreground">
+                            {time}
+                          </div>
+
+                          {filteredWeekDates.map((date) => (
+                            <div
+                              key={date.toDateString()}
+                              className={cn(
+                                "flex-1 relative border-r border-[var(--color-border-alpha-30)] last:border-r-0",
+                                config.squeezeWeekOnMobile ? "" : "min-w-24",
+                                DateFormatUtils.isToday(date)
+                                  ? "bg-[var(--color-accent-alpha-5)]"
+                                  : "bg-transparent",
+                              )}
+                            >
+                              {/* Events for this time slot */}
+                              {filteredWeekEvents[date.toDateString()]?.map(
+                                (event) => {
+                                  const dayEvents =
+                                    filteredWeekEvents[date.toDateString()] ||
+                                    [];
+                                  const eventStartHour = event.startHour;
+                                  const eventEndHour =
+                                    event.startHour + event.duration;
+                                  const slotHour = parseInt(
+                                    time.split(":")[0],
+                                    10,
+                                  );
+                                  const nextSlotHour =
+                                    timeIndex < timeSlots.length - 1
+                                      ? parseInt(
+                                          timeSlots[timeIndex + 1].split(
+                                            ":",
+                                          )[0],
+                                          10,
+                                        )
+                                      : slotHour + 1;
+
+                                  // Check if event starts in this time slot
+                                  if (
+                                    eventStartHour >= slotHour &&
+                                    eventStartHour < nextSlotHour
+                                  ) {
+                                    const topOffset =
+                                      (eventStartHour - slotHour) *
+                                      WEEK_HOUR_HEIGHT; // WEEK_HOUR_HEIGHT px per hour
+                                    const height =
+                                      event.duration * WEEK_HOUR_HEIGHT; // WEEK_HOUR_HEIGHT px per hour
+                                    const colorPair =
+                                      ScheduleUtils.getColorPair(
+                                        event.title,
+                                        event.id,
+                                        metadataByEvent,
+                                        metadataByRealization,
+                                      );
+                                    const isHidden = isEventEffectivelyHidden(
+                                      event.id,
+                                    );
+                                    const overlapsWithVisibleEvent =
+                                      dayEvents.some((otherEvent) => {
+                                        if (otherEvent.id === event.id) {
+                                          return false;
+                                        }
+                                        const otherEndHour =
+                                          otherEvent.startHour +
+                                          otherEvent.duration;
+                                        const overlaps =
+                                          eventStartHour < otherEndHour &&
+                                          otherEvent.startHour < eventEndHour;
+                                        return (
+                                          overlaps &&
+                                          !isEventEffectivelyHidden(
+                                            otherEvent.id,
+                                          )
+                                        );
+                                      });
+                                    const overlapsWithHiddenEvent =
+                                      dayEvents.some((otherEvent) => {
+                                        if (otherEvent.id === event.id) {
+                                          return false;
+                                        }
+                                        const otherEndHour =
+                                          otherEvent.startHour +
+                                          otherEvent.duration;
+                                        const overlaps =
+                                          eventStartHour < otherEndHour &&
+                                          otherEvent.startHour < eventEndHour;
+                                        return (
+                                          overlaps &&
+                                          isEventEffectivelyHidden(
+                                            otherEvent.id,
+                                          )
+                                        );
+                                      });
+                                    // Layout for overlapping events (column index & total cols)
+                                    const layout = eventLayoutByDate[
+                                      date.toDateString()
+                                    ]?.[event.id] || { col: 0, cols: 1 };
+                                    let leftPercent =
+                                      (layout.col / layout.cols) * 100;
+                                    let widthPercent = 100 / layout.cols;
+
+                                    if (isHidden && overlapsWithVisibleEvent) {
+                                      widthPercent = Math.min(widthPercent, 25);
+                                      leftPercent = Math.max(
+                                        leftPercent,
+                                        100 - widthPercent,
+                                      );
+                                    } else if (
+                                      !isHidden &&
+                                      overlapsWithHiddenEvent &&
+                                      layout.cols === 2
+                                    ) {
+                                      widthPercent = 75;
+                                      leftPercent = 0;
+                                    }
+
+                                    return (
+                                      <ContextMenu key={event.id}>
+                                        <ContextMenuTrigger
+                                          className="absolute"
+                                          style={
+                                            {
+                                              top: `${topOffset}px`,
+                                              left: `${leftPercent}%`,
+                                              width: `calc(${widthPercent}% - 8px)`,
+                                              height: `${Math.max(height, SCHEDULE_LAYOUT.EVENT.MIN_HEIGHT)}px`,
+                                              zIndex: isHidden ? 10 : 12,
+                                            } as React.CSSProperties
+                                          }
+                                        >
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <button
+                                                type="button"
+                                                className={`w-full h-full rounded text-white text-xs p-1 cursor-pointer overflow-hidden schedule-event-gradient schedule-event-gradient-week border-none text-left appearance-none flex flex-col items-start justify-start`}
+                                                style={
+                                                  {
+                                                    background:
+                                                      colorPair.normal,
+                                                    opacity: isHidden
+                                                      ? config.hiddenEventOpacity /
+                                                        100
+                                                      : 1,
+                                                    "--normal-gradient":
+                                                      colorPair.normal,
+                                                  } as React.CSSProperties & {
+                                                    "--normal-gradient": string;
+                                                  }
+                                                }
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  e.stopPropagation();
+                                                  openEventDetailsDialog(event);
+                                                }}
+                                              >
+                                                <div className="font-semibold line-clamp-2 leading-tight">
+                                                  {getDisplayTitle(
+                                                    getEventDisplayName(event),
+                                                  )}
+                                                </div>
+                                                {getEventLocation(event) &&
+                                                  height > 56 && (
+                                                    <div className="text-xs opacity-90 leading-tight">
+                                                      📍{" "}
+                                                      {getEventLocation(event)}
+                                                    </div>
+                                                  )}
+                                                <div className="text-xs opacity-75 line-clamp-2">
+                                                  {ScheduleUtils.formatTimeRange(
+                                                    event.startTime,
+                                                    event.endTime,
+                                                  )}
+                                                </div>
+                                                {hasTimeOverrideChange(
+                                                  event,
+                                                ) && (
+                                                  <div className="absolute bottom-1 right-1 flex items-center gap-1 text-white/80 pointer-events-none">
+                                                    <Pencil className="h-3 w-3" />
+                                                  </div>
+                                                )}
+                                              </button>
+                                            </TooltipTrigger>
+                                            <TooltipContent
+                                              side="top"
+                                              className="w-80 space-y-1"
+                                            >
+                                              <p className="text-sm font-semibold leading-tight">
+                                                {getDisplayTitle(
+                                                  getEventDisplayName(event),
+                                                )}
+                                              </p>
+                                              <p className="text-xs text-background/80">
+                                                {ScheduleUtils.formatTimeRange(
+                                                  event.startTime,
+                                                  event.endTime,
+                                                )}
+                                                {` · ${event.duration.toFixed(1)}h`}
+                                              </p>
+                                              {getEventLocation(event) && (
+                                                <p className="text-xs text-background/80">
+                                                  📍 {getEventLocation(event)}
+                                                </p>
+                                              )}
+                                              {event.teachers?.length ? (
+                                                <p className="text-xs text-background/80 line-clamp-2">
+                                                  {event.teachers.join(", ")}
+                                                </p>
+                                              ) : null}
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </ContextMenuTrigger>
+                                        <ContextMenuContent>
+                                          <ContextMenuItem
+                                            onClick={() =>
+                                              openEventDetailsDialog(event)
+                                            }
+                                          >
+                                            <Calendar className="mr-2 h-4 w-4" />
+                                            {tColor("contextMenu.eventDetails")}
+                                          </ContextMenuItem>
+                                          <ContextMenuItem
+                                            onClick={() =>
+                                              toggleEventVisibility(event)
+                                            }
+                                          >
+                                            {isHidden ? (
+                                              <>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                {tColor(
+                                                  "contextMenu.showEvent",
+                                                )}
+                                              </>
+                                            ) : (
+                                              <>
+                                                <EyeOff className="mr-2 h-4 w-4" />
+                                                {tColor(
+                                                  "contextMenu.hideEvent",
+                                                )}
+                                              </>
+                                            )}
+                                          </ContextMenuItem>
+                                          <ContextMenuItem
+                                            onClick={() =>
+                                              openColorCustomizer(event)
+                                            }
+                                          >
+                                            <Palette className="mr-2 h-4 w-4" />
+                                            {tColor(
+                                              "contextMenu.customizeColor",
+                                            )}
+                                          </ContextMenuItem>
+                                        </ContextMenuContent>
+                                      </ContextMenu>
+                                    );
+                                  }
+                                  return null;
+                                },
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Realization Dialog */}
+          <RealizationDialog
+            open={realizationDialogOpen}
+            onOpenChange={closeRealizationDialog}
+            realizationData={realizationData}
+            isLoading={realizationLoading}
+            error={realizationError}
+          />
+
+          {/* Event Details Dialog */}
+          <EventDetailsDialog
+            open={eventDetailsDialogOpen}
+            onOpenChange={closeEventDetailsDialog}
+            event={selectedEvent}
+            hideNoRealizationIdWarning={Boolean(
+              selectedEvent && isCustomScheduleEventId(selectedEvent.id),
+            )}
+            allowNameEditing
+            allowLocationEditing
+            onOpenRealizationDialog={openRealizationDialog}
+            onOpenRealizationDialogByCode={openRealizationDialogByCode}
+            onOpenColorCustomizer={openColorCustomizer}
+            isRealizationLoading={realizationLoading}
+          />
+
+          {/* Color Customizer Dialog */}
+          {selectedEventForColor && (
+            <RealizationColorCustomizer
+              open={Boolean(colorEventId)}
+              onOpenChange={(isOpen: boolean) => {
+                if (!isOpen) {
+                  setColorEventId(null);
+                }
+              }}
+              eventId={selectedEventForColor.id}
+              eventTitle={getDisplayTitle(
+                getEventDisplayName(selectedEventForColor),
+              )}
+              eventTitleRaw={getEventDisplayName(selectedEventForColor)}
+              realizationCode={
+                metadataByEvent[selectedEventForColor.id]
+                  ?.attachedRealizationId ||
+                RealizationApiService.extractRealizationCode(
+                  getEventDisplayName(selectedEventForColor),
+                ) ||
+                ""
+              }
+              realizationTitle={RealizationApiService.stripRealizationCode(
+                getEventDisplayName(selectedEventForColor),
+              )}
+            />
+          )}
+        </div>
+      </TooltipProvider>
+    );
+  },
+);
+
+WeekView.displayName = "WeekView";
+
+export default WeekView;

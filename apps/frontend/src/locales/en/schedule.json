@@ -1,0 +1,203 @@
+{
+  "weekView": {
+    "noEvents": "No events",
+    "noEventsDescription": "No events scheduled for this week!",
+    "currentTime": "Now",
+    "week": "Week",
+    "weekShort": "Week"
+  },
+  "dayView": {
+    "noEvents": "No events",
+    "noEventsDescription": "No events scheduled for this day!",
+    "swipeToNavigate": "← Swipe to change day →",
+    "breakDuration": "break"
+  },
+  "navigation": {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "today": "Today",
+    "createEvent": "Create event"
+  },
+  "monthView": {
+    "subtitle": "Month overview",
+    "highlights": "Highlights",
+    "scheduledHours": "Scheduled",
+    "hidden": "Hidden",
+    "gapHours": "Gap hours",
+    "timeConsumption": "Time consumption",
+    "noEvents": "No events this month"
+  },
+  "title": "Schedule",
+  "ptivis25Notice": {
+    "title": "Please note that this calendar does not show your study path schedule!",
+    "description": "You are currently using the general group calendar. When you move to your study path schedule, you will need to set this calendar tool to follow your personal schedule if you want to keep using the service."
+  },
+  "calendar": {
+    "urlMissing": "Connect your calendar",
+    "urlMissingDescription": "Add an iCal source from Turku AMK to start using your schedule.",
+    "linkCalendar": "Link calendar"
+  },
+  "onboarding": {
+    "title": "Set up your schedule",
+    "description": "Pick your group or add iCal.",
+    "progress": {
+      "label": "Step {{current}} of {{total}}"
+    },
+    "steps": {
+      "calendar": "Calendar",
+      "theme": "Theme"
+    },
+    "calendarStep": {
+      "title": "Connect calendar",
+      "description": "",
+      "selectTitle": "Choose Group",
+      "subtitle": "Which group do you belong in? If you happen to have special classes that aren't scheduled for the rest of the group, consider setting up a custom calendar.",
+      "quickSetup": {
+        "title": "Quick setup",
+        "description": "Choose your group to auto-fill the calendar source."
+      },
+      "custom": {
+        "title": "Use custom iCal URL",
+        "description": "",
+        "label": "Calendar URL",
+        "placeholder": "https://lukkari.turkuamk.fi/ical.php?hash=...",
+        "save": "Continue",
+        "back": "Back to groups"
+      },
+      "customNotFound": "I don't see myself here! / I want to use a custom calendar",
+      "guide": {
+        "title": "How to get your iCal link",
+        "step1": "Sign in to Turku AMK Lukkarikone.",
+        "step2": "Open schedule management and create or edit your schedule.",
+        "step3": "Configure the groups/events you want.",
+        "step4": "Open the schedule and generate an iCal link, then copy it."
+      }
+    },
+    "themeStep": {
+      "title": "Choose theme",
+      "description": "Optional",
+      "subtitle": "We've got no color designers. Please send your impeccable theme ideas to avoinlukkari@juh.fi.",
+      "actions": {
+        "back": "Back",
+        "done": "Finish setup"
+      }
+    },
+    "validation": {
+      "required": "Calendar URL is required",
+      "invalid": "Please enter a valid URL",
+      "mustBeTurkuAmk": "URL must be from Turku AMK calendar system"
+    }
+  },
+  "loading": {
+    "schedule": "Loading schedule..."
+  },
+  "status": {
+    "updatedAt": "Updated {{time}}",
+    "lastRefresh": "Last Refresh",
+    "refreshInfo": "The schedule is automatically refreshed every 15 minutes to keep your calendar up to date. Data is provided by Lukkarikone's iCal-service.",
+    "checkingForUpdates": "Checking for updates...",
+    "fetchingCalendar": "Loading calendar...",
+    "error": "Error updating calendar",
+    "errorTitle": "Error",
+    "errorInfo": "Failed to refresh the calendar data. Displaying an older version from {{time}} instead.",
+    "noCalendar": "No calendar",
+    "icalSources": "iCal Sources",
+    "lastUpdated": "Last updated",
+    "lastFetched": "Last fetched",
+    "neverFetched": "Never"
+  },
+  "errors": {
+    "loadingFailed": "Schedule loading failed",
+    "close": "Close",
+    "dismiss": "Dismiss",
+    "updateFailed": "Couldn't update calendar",
+    "updateFailedDescription": "The calendar data couldn't be refreshed. Showing an older version.",
+    "errorCode": "Error Code"
+  },
+  "dateFormat": {
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "daysShort": {
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "months": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    },
+    "monthsShort": {
+      "january": "Jan",
+      "february": "Feb",
+      "march": "Mar",
+      "april": "Apr",
+      "may": "May",
+      "june": "Jun",
+      "july": "Jul",
+      "august": "Aug",
+      "september": "Sep",
+      "october": "Oct",
+      "november": "Nov",
+      "december": "Dec"
+    }
+  },
+  "calendarModal": {
+    "title": "Set Calendar URL",
+    "description": "Use quick setup for common groups or enter your own Turku AMK iCal URL.",
+    "quickSetup": {
+      "title": "Quick setup",
+      "description": "Select a group to configure the calendar URL automatically.",
+      "groups": {
+        "ptivis25a": "PTIVIS25A",
+        "ptivis25b": "PTIVIS25B",
+        "ptivis25c": "PTIVIS25C",
+        "ptivis25d": "PTIVIS25D",
+        "ptivis25e": "PTIVIS25E",
+        "ptivis25f": "PTIVIS25F",
+        "ptivis26a": "PTIVIS26A",
+        "ptivis26b": "PTIVIS26B",
+        "ptivis26c": "PTIVIS26C",
+        "ptivis26d": "PTIVIS26D",
+        "ptivis26e": "PTIVIS26E",
+        "ptivis26f": "PTIVIS26F"
+      }
+    },
+    "customUrl": {
+      "title": "Custom URL",
+      "description": "Enter your calendar URL from Turku AMK calendar system",
+      "placeholder": "https://lukkari.turkuamk.fi/ical.php?hash=...",
+      "label": "Calendar URL"
+    },
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "validation": {
+      "required": "Calendar URL is required",
+      "invalid": "Please enter a valid URL",
+      "mustBeTurkuAmk": "URL must be from Turku AMK calendar system"
+    }
+  }
+}

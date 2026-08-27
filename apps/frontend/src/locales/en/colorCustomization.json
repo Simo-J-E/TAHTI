@@ -1,0 +1,28 @@
+{
+  "dialog": {
+    "title": "Customize Realization Color",
+    "tabs": {
+      "event": "This event",
+      "realization": "Entire course"
+    },
+    "eventLabel": "Event:",
+    "realizationCodeLabel": "Realization Code:",
+    "colorPreviewLabel": "Color Preview",
+    "sampleEventText": "Sample Event ({{code}})",
+    "selectColorLabel": "Select a preset color",
+    "customColorLabel": "Or choose a custom color",
+    "buttons": {
+      "apply": "Apply",
+      "resetToDefault": "Reset to Default",
+      "cancel": "Cancel",
+      "useCustomColor": "Use Custom Color"
+    }
+  },
+  "contextMenu": {
+    "eventDetails": "Event Details",
+    "customizeColor": "Customize Color",
+    "hideEvent": "Hide Event",
+    "showEvent": "Show Event",
+    "deleteEvent": "Delete Event"
+  }
+}

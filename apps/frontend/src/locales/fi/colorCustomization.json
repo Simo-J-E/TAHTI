@@ -1,0 +1,28 @@
+{
+  "dialog": {
+    "title": "Mukauta toteutuksen väri",
+    "tabs": {
+      "event": "Tämä tapahtuma",
+      "realization": "Koko toteutus"
+    },
+    "eventLabel": "Tapahtuma:",
+    "realizationCodeLabel": "Toteutuskoodi:",
+    "colorPreviewLabel": "Värin esikatselu",
+    "sampleEventText": "Esimerkkitapahtuma ({{code}})",
+    "selectColorLabel": "Valitse esiasettu väri",
+    "customColorLabel": "Tai valitse oma väri",
+    "buttons": {
+      "apply": "Käytä",
+      "resetToDefault": "Palauta oletukseen",
+      "cancel": "Peruuta",
+      "useCustomColor": "Käytä omaa väriä"
+    }
+  },
+  "contextMenu": {
+    "eventDetails": "Tapahtuman tiedot",
+    "customizeColor": "Mukauta väriä",
+    "hideEvent": "Piilota tapahtuma",
+    "showEvent": "Näytä tapahtuma",
+    "deleteEvent": "Poista tapahtuma"
+  }
+}

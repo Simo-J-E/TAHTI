@@ -1,0 +1,29 @@
+[
+  {
+    "id": "2025-10-release-1.1-um",
+    "enabled": false,
+    "priority": 10,
+    "title": {
+      "en": "Lukkarikone v1.1",
+      "fi": "Lukkarikone v1.1"
+    },
+    "body": {
+      "en": "Hide events, customize colors, event info, course info, keyboard shortcuts",
+      "fi": "Piilota tapahtumia, mukauta värejä, katso tapahtuman tietoja & kurssin tietoja, uusia pikanäppäimiä"
+    },
+    "dismissal": "manual",
+    "availability": {
+      "startsAt": "2025-09-30T07:00:00.000Z"
+    },
+    "sonner": {
+      "variant": "description",
+      "duration": 9000,
+      "actionLabel": {
+        "en": "See release notes",
+        "fi": "Katso julkaisutiedot"
+      },
+      "actionHref": "https://github.com/juhanias/lukkarikone/releases/latest",
+      "dismisses": false
+    }
+  }
+]

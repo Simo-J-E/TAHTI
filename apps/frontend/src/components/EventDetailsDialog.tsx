@@ -1,0 +1,847 @@
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  BookOpen,
+  Calendar,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  GraduationCap,
+  Info,
+  MapPin,
+  Palette,
+  Pencil,
+  SquarePen,
+  Trash2,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
+import { useEventTimeEditDialogParam } from "../hooks/useDialogParams";
+import { useIsMobile } from "../hooks/useIsMobile";
+import { RealizationApiService } from "../services/realizationApi";
+import {
+  useEventMetadataStore,
+  useRealizationMetadataStore,
+  useScheduleStore,
+} from "../state/state-management";
+import type { ScheduleEvent } from "../types/schedule";
+import AttachRealizationDialog from "./AttachRealizationDialog";
+import EventLocationEditDialog from "./EventLocationEditDialog";
+import EventTimeEditDialog from "./EventTimeEditDialog";
+import { ActionButton } from "./ui/ActionButton";
+import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+
+interface EventDetailsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  event: ScheduleEvent | null;
+  hideNoRealizationIdWarning?: boolean;
+  allowNameEditing?: boolean;
+  allowLocationEditing?: boolean;
+  onOpenRealizationDialog?: (eventTitle: string) => void;
+  onOpenRealizationDialogByCode?: (realizationCode: string) => void;
+  onOpenColorCustomizer?: (event: ScheduleEvent) => void;
+  isRealizationLoading?: boolean;
+}
+
+const EventDetailsDialog = ({
+  open,
+  onOpenChange,
+  event,
+  hideNoRealizationIdWarning = false,
+  allowNameEditing = false,
+  allowLocationEditing = false,
+  onOpenRealizationDialog,
+  onOpenRealizationDialogByCode,
+  onOpenColorCustomizer,
+  isRealizationLoading = false,
+}: EventDetailsDialogProps) => {
+  const { t } = useTranslation("dialogs");
+  const { t: tColor } = useTranslation("colorCustomization");
+  const isMobile = useIsMobile();
+  const {
+    clearEventHidden,
+    getEventMetadata,
+    isEventHidden,
+    hasSeenEditWarning,
+    metadataByEvent,
+    setHasSeenEditWarning,
+    setEventHidden,
+  } = useEventMetadataStore();
+  const { hideRealization, isRealizationHidden, showRealization } =
+    useRealizationMetadataStore();
+  const { deleteCustomEvent, events } = useScheduleStore();
+  const [lastEvent, setLastEvent] = useState<ScheduleEvent | null>(null);
+  const [hideCourseDialogOpen, setHideCourseDialogOpen] = useState(false);
+  const [attachDialogOpen, setAttachDialogOpen] = useState(false);
+  const [editWarningOpen, setEditWarningOpen] = useState(false);
+  const [locationEditDialogOpen, setLocationEditDialogOpen] = useState(false);
+  const [editTimeParam, setEditTimeParam] = useEventTimeEditDialogParam();
+  const noRealizationWhyNotLabel = t("eventDetailsDialog.noRealizationWhyNot");
+  const noRealizationWhyNotExplanation = t(
+    "eventDetailsDialog.noRealizationWhyNotExplanation",
+  );
+
+  useEffect(() => {
+    if (event) {
+      setLastEvent(event);
+    }
+  }, [event]);
+
+  useEffect(() => {
+    if (!event && editTimeParam) {
+      setEditTimeParam(null);
+    }
+  }, [event, editTimeParam, setEditTimeParam]);
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString("fi-FI", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("fi-FI", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  const getDurationString = (duration: number) => {
+    const hours = Math.floor(duration);
+    const minutes = Math.round((duration - hours) * 60);
+
+    if (hours === 0) return `${minutes} min`;
+    if (minutes === 0) return `${hours} h`;
+    return `${hours} h ${minutes} min`;
+  };
+
+  const handleOpenTimeEdit = () => {
+    if (!event) {
+      return;
+    }
+    if (hasSeenEditWarning) {
+      setEditTimeParam("true");
+      return;
+    }
+    setEditWarningOpen(true);
+  };
+
+  const handleConfirmTimeEditWarning = () => {
+    setHasSeenEditWarning(true);
+    setEditWarningOpen(false);
+    setEditTimeParam("true");
+  };
+
+  const handleOpenRealizationDialog = () => {
+    if (!event) {
+      return;
+    }
+    const eventTitleForActions =
+      getEventMetadata(event.id)?.name || event.title;
+    const attachedRealizationId =
+      getEventMetadata(event.id)?.attachedRealizationId ?? null;
+    if (attachedRealizationId && onOpenRealizationDialogByCode) {
+      onOpenRealizationDialogByCode(attachedRealizationId);
+      return;
+    }
+    if (onOpenRealizationDialog) {
+      onOpenRealizationDialog(eventTitleForActions);
+    }
+  };
+
+  const handleToggleVisibility = () => {
+    if (!event) {
+      return;
+    }
+    // Visibility priority: per-event override, then realization hidden state, then event default; setEventHidden flips the effective state.
+    const attachedRealizationId =
+      getEventMetadata(event.id)?.attachedRealizationId ?? null;
+    const realizationCode = RealizationApiService.getEffectiveRealizationCode(
+      getEventMetadata(event.id)?.name || event.title,
+      attachedRealizationId,
+    );
+    const override = getEventMetadata(event.id)?.hidden;
+    if (typeof override === "boolean") {
+      setEventHidden(event.id, !override);
+      return;
+    }
+    if (realizationCode && isRealizationHidden(realizationCode)) {
+      setEventHidden(event.id, false);
+      return;
+    }
+    setEventHidden(event.id, !isEventHidden(event.id));
+  };
+
+  const handleOpenColorCustomizer = () => {
+    if (event && onOpenColorCustomizer) {
+      onOpenColorCustomizer(event);
+    }
+  };
+
+  const handleConfirmHideCourse = () => {
+    if (!event) {
+      return;
+    }
+    const attachedRealizationId =
+      getEventMetadata(event.id)?.attachedRealizationId ?? null;
+    const realizationCode = RealizationApiService.getEffectiveRealizationCode(
+      getEventMetadata(event.id)?.name || event.title,
+      attachedRealizationId,
+    );
+    if (!realizationCode) {
+      return;
+    }
+    hideRealization(realizationCode);
+    setHideCourseDialogOpen(false);
+  };
+
+  const handleShowCourse = () => {
+    if (!event) {
+      return;
+    }
+    const attachedRealizationId =
+      getEventMetadata(event.id)?.attachedRealizationId ?? null;
+    const realizationCode = RealizationApiService.getEffectiveRealizationCode(
+      getEventMetadata(event.id)?.name || event.title,
+      attachedRealizationId,
+    );
+    if (!realizationCode) {
+      return;
+    }
+    showRealization(realizationCode);
+    events.forEach((scheduledEvent) => {
+      const scheduledAttached =
+        getEventMetadata(scheduledEvent.id)?.attachedRealizationId ?? null;
+      const scheduledCode = RealizationApiService.getEffectiveRealizationCode(
+        scheduledEvent.title,
+        scheduledAttached,
+      );
+      if (scheduledCode !== realizationCode) {
+        return;
+      }
+      if (metadataByEvent[scheduledEvent.id]?.hidden === false) {
+        clearEventHidden(scheduledEvent.id);
+      }
+    });
+  };
+
+  const getInterestingDescription = (description?: string | null) => {
+    if (!description) return null;
+
+    const stripped = description
+      .replace(/\bHenkilö\(t\):[^\n\r]*/gi, "")
+      .replace(/\bRyhmä\(t\):[^\n\r]*/gi, "");
+    const cleaned = stripped
+      .replace(/\s*\n\s*/g, "\n")
+      .replace(/\s{2,}/g, " ")
+      .replace(/^[,.;:\-\s]+|[,.;:\-\s]+$/g, "")
+      .trim();
+
+    return cleaned.length > 0 ? cleaned : null;
+  };
+
+  const displayEvent = event ?? lastEvent;
+  const isManualCustomEvent =
+    event !== null && getEventMetadata(event.id)?.source === "manual";
+  const canEditName = allowNameEditing && isManualCustomEvent;
+  const canEditLocation = allowLocationEditing && isManualCustomEvent;
+  const attachedRealizationId = displayEvent
+    ? (getEventMetadata(displayEvent.id)?.attachedRealizationId ?? null)
+    : null;
+  const effectiveRealizationCode = displayEvent
+    ? RealizationApiService.getEffectiveRealizationCode(
+        getEventMetadata(displayEvent.id)?.name || displayEvent.title,
+        attachedRealizationId,
+      )
+    : null;
+  const displayTitle = displayEvent
+    ? (() => {
+        const metadataName = getEventMetadata(displayEvent.id)?.name;
+        const baseTitle = RealizationApiService.stripRealizationCode(
+          metadataName || displayEvent.title,
+        );
+        if (!effectiveRealizationCode) {
+          return baseTitle;
+        }
+        const codeForDisplay = effectiveRealizationCode.toUpperCase();
+        return `${baseTitle} ${codeForDisplay}`.trim();
+      })()
+    : "";
+  const displayDescription = displayEvent
+    ? getInterestingDescription(displayEvent.description)
+    : null;
+  const displayLocation = displayEvent
+    ? (getEventMetadata(displayEvent.id)?.location ?? displayEvent.location)
+    : "";
+  const headerTitle = displayEvent ? displayTitle : "";
+  const headerDescription = displayEvent ? displayDescription : null;
+  const realizationCode = event
+    ? RealizationApiService.getEffectiveRealizationCode(
+        getEventMetadata(event.id)?.name || event.title,
+        attachedRealizationId,
+      )
+    : null;
+  const hasRealizationCode = event
+    ? RealizationApiService.hasRealizationCode(
+        getEventMetadata(event.id)?.name || event.title,
+      )
+    : false;
+  const hasEffectiveRealizationCode = Boolean(realizationCode);
+  const isHidden = event
+    ? (() => {
+        const override = getEventMetadata(event.id)?.hidden;
+        if (typeof override === "boolean") {
+          return override;
+        }
+        return Boolean(realizationCode && isRealizationHidden(realizationCode));
+      })()
+    : false;
+  const isCourseHidden = realizationCode
+    ? isRealizationHidden(realizationCode)
+    : false;
+  const timeOverride = event ? getEventMetadata(event.id)?.time : null;
+  const originalStartTime = timeOverride
+    ? new Date(timeOverride.originalStartTimeIso)
+    : null;
+  const originalEndTime = timeOverride
+    ? new Date(timeOverride.originalEndTimeIso)
+    : null;
+  const hasTimeOverrideChange =
+    timeOverride &&
+    originalStartTime &&
+    originalEndTime &&
+    (event
+      ? formatDate(originalStartTime) !== formatDate(event.startTime) ||
+        formatTime(originalStartTime) !== formatTime(event.startTime) ||
+        formatTime(originalEndTime) !== formatTime(event.endTime)
+      : false);
+  const hasDateOverrideChange =
+    timeOverride &&
+    originalStartTime &&
+    event &&
+    formatDate(originalStartTime) !== formatDate(event.startTime);
+  const originalDuration =
+    originalStartTime && originalEndTime
+      ? (originalEndTime.getTime() - originalStartTime.getTime()) /
+        (1000 * 60 * 60)
+      : null;
+
+  const teachers = (event?.teachers ?? [])
+    .flatMap((teacher) => teacher.split(","))
+    .map((teacher) => teacher.trim())
+    .filter(Boolean);
+  const groups = (event?.groups ?? [])
+    .flatMap((group) => group.split(","))
+    .map((group) => group.trim())
+    .filter(Boolean);
+  const hasTeachers = teachers.length > 0;
+  const hasGroups = groups.length > 0;
+
+  const detailsBody = (
+    <AnimatePresence mode="wait">
+      {event && (
+        <motion.div
+          key="event-details"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="space-y-4"
+          style={{ willChange: "transform, opacity" }}
+        >
+          {/* Date & Schedule */}
+          <div className="rounded-lg border overflow-hidden bg-[var(--color-surface-alpha-40)] border-[var(--color-border-alpha-30)]">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold flex items-center gap-1.5 text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  {t("eventDetailsDialog.schedule")}
+                </h4>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleOpenTimeEdit}
+                  aria-label={t("eventTimeEditDialog.openButton")}
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="space-y-1">
+                {hasTimeOverrideChange &&
+                originalStartTime &&
+                originalEndTime ? (
+                  <>
+                    {hasDateOverrideChange && (
+                      <p className="text-sm line-through text-muted-foreground">
+                        {formatDate(originalStartTime)}
+                      </p>
+                    )}
+                    <p className="text-sm text-foreground">
+                      {formatDate(event.startTime)}
+                    </p>
+                    <p className="text-sm line-through text-muted-foreground">
+                      {formatTime(originalStartTime)} –{" "}
+                      {formatTime(originalEndTime)}
+                      {typeof originalDuration === "number" && (
+                        <span className="ml-2 text-xs">
+                          ({getDurationString(originalDuration)})
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-sm text-foreground">
+                      {formatTime(event.startTime)} –{" "}
+                      {formatTime(event.endTime)}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        ({getDurationString(event.duration)})
+                      </span>
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-foreground">
+                      {formatDate(event.startTime)}
+                    </p>
+                    <p className="text-sm text-foreground">
+                      {formatTime(event.startTime)} –{" "}
+                      {formatTime(event.endTime)}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        ({getDurationString(event.duration)})
+                      </span>
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Location */}
+          {displayLocation && (
+            <div className="rounded-lg border overflow-hidden bg-[var(--color-surface-alpha-40)] border-[var(--color-border-alpha-30)]">
+              <div className="p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold flex items-center gap-1.5 text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    {t("eventDetailsDialog.location")}
+                  </h4>
+                  {canEditLocation && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setLocationEditDialogOpen(true)}
+                      aria-label={t("eventDetailsDialog.editLocation")}
+                    >
+                      <SquarePen className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <p className="text-sm text-foreground">{displayLocation}</p>
+              </div>
+            </div>
+          )}
+
+          {/* People & teachers */}
+          {(hasTeachers || hasGroups) && (
+            <div className="rounded-lg border overflow-hidden bg-[var(--color-surface-alpha-40)] border-[var(--color-border-alpha-30)]">
+              <div className="flex flex-col">
+                {hasTeachers && (
+                  <div
+                    className={`p-4 ${hasGroups ? "border-b" : ""}`}
+                    style={
+                      hasGroups
+                        ? { borderColor: "var(--color-border-alpha-30)" }
+                        : undefined
+                    }
+                  >
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5 text-muted-foreground">
+                      <GraduationCap className="h-4 w-4" />
+                      {t("eventDetailsDialog.teachers")}
+                    </h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {teachers.map((teacher) => (
+                        <span
+                          key={`${event.id}-teacher-${teacher}`}
+                          className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-[var(--color-surface)] text-foreground border border-[var(--color-border-alpha-30)]"
+                        >
+                          {teacher}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {hasGroups && (
+                  <div className="p-4">
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1.5 text-muted-foreground">
+                      <Users className="h-4 w-4" />
+                      {t("eventDetailsDialog.studentGroups")}
+                    </h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {groups.map((group) => (
+                        <span
+                          key={`${event.id}-group-${group}`}
+                          className="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium bg-[var(--color-surface)] text-foreground border border-[var(--color-border-alpha-30)]"
+                        >
+                          {group}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Action Button for Realization Dialog */}
+          {event && (
+            <div
+              className="pt-4 border-t"
+              style={{ borderColor: "var(--color-border-alpha-30)" }}
+            >
+              <div className="space-y-2">
+                {hasEffectiveRealizationCode &&
+                  (onOpenRealizationDialog ||
+                    onOpenRealizationDialogByCode) && (
+                    <ActionButton
+                      onClick={handleOpenRealizationDialog}
+                      variant="primary"
+                      disabled={isRealizationLoading}
+                      size="sm"
+                      className="w-full sm:w-auto"
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {isRealizationLoading ? (
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                        ) : (
+                          <ExternalLink className="h-4 w-4" />
+                        )}
+                        {t("eventDetailsDialog.showRealizationDetails")}
+                      </div>
+                    </ActionButton>
+                  )}
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start">
+                  <ActionButton
+                    onClick={() => {
+                      if (!event) {
+                        return;
+                      }
+                      if (isManualCustomEvent) {
+                        deleteCustomEvent(event.id);
+                        onOpenChange(false);
+                        return;
+                      }
+                      handleToggleVisibility();
+                    }}
+                    variant={isManualCustomEvent ? "danger" : "subtle"}
+                    className="w-full sm:w-auto"
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      {isManualCustomEvent ? (
+                        <>
+                          <Trash2 className="h-4 w-4" />
+                          {tColor("contextMenu.deleteEvent")}
+                        </>
+                      ) : isHidden ? (
+                        <>
+                          <Eye className="h-4 w-4" />
+                          {tColor("contextMenu.showEvent")}
+                        </>
+                      ) : (
+                        <>
+                          <EyeOff className="h-4 w-4" />
+                          {tColor("contextMenu.hideEvent")}
+                        </>
+                      )}
+                    </div>
+                  </ActionButton>
+                  {onOpenColorCustomizer && (
+                    <ActionButton
+                      onClick={handleOpenColorCustomizer}
+                      variant="subtle"
+                      className="w-full sm:w-auto"
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        <Palette className="h-4 w-4" />
+                        {tColor("contextMenu.customizeColor")}
+                      </div>
+                    </ActionButton>
+                  )}
+                  {!hasRealizationCode && (
+                    <ActionButton
+                      onClick={() => setAttachDialogOpen(true)}
+                      variant="subtle"
+                      className="w-full sm:w-auto"
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {attachedRealizationId
+                          ? t("eventDetailsDialog.attachRealization.change")
+                          : t("eventDetailsDialog.attachRealization.button")}
+                      </div>
+                    </ActionButton>
+                  )}
+                  {hasEffectiveRealizationCode && (
+                    <ActionButton
+                      onClick={() => {
+                        if (isCourseHidden) {
+                          handleShowCourse();
+                        } else {
+                          setHideCourseDialogOpen(true);
+                        }
+                      }}
+                      variant={isCourseHidden ? "subtle" : "danger"}
+                      className="w-full sm:w-auto"
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {isCourseHidden
+                          ? t("eventDetailsDialog.showCourse")
+                          : t("eventDetailsDialog.hideCourse")}
+                      </div>
+                    </ActionButton>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Info about missing realization data */}
+          {event.title &&
+            !hasEffectiveRealizationCode &&
+            !hideNoRealizationIdWarning && (
+              <div className="rounded-lg p-4 border bg-[var(--color-surface-alpha-40)] border-[var(--color-border-alpha-30)]">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Info className="h-4 w-4 shrink-0" />
+                  <span className="text-sm">
+                    {t("eventDetailsDialog.noRealizationData")}{" "}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="hidden md:inline-flex underline underline-offset-2"
+                          >
+                            {noRealizationWhyNotLabel}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs text-xs">
+                          {noRealizationWhyNotExplanation}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <Sheet>
+                      <SheetTrigger asChild>
+                        <button
+                          type="button"
+                          className="md:hidden underline underline-offset-2"
+                        >
+                          {noRealizationWhyNotLabel}
+                        </button>
+                      </SheetTrigger>
+                      <SheetContent side="bottom">
+                        <SheetHeader>
+                          <SheetTitle>{noRealizationWhyNotLabel}</SheetTitle>
+                          <SheetDescription>
+                            {noRealizationWhyNotExplanation}
+                          </SheetDescription>
+                        </SheetHeader>
+                      </SheetContent>
+                    </Sheet>
+                  </span>
+                </div>
+              </div>
+            )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[90dvh] max-h-[90dvh] border-[var(--color-border-alpha-30)] bg-[var(--color-surface)] p-0 text-foreground">
+            <DrawerHeader className="shrink-0 items-start px-6 pb-3 !text-left group-data-[vaul-drawer-direction=bottom]/drawer-content:!text-left">
+              {headerTitle && (
+                <DrawerTitle className="w-full text-left text-xl font-bold text-foreground flex items-center gap-1.5">
+                  <span>{headerTitle}</span>
+                  {canEditName && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleOpenTimeEdit}
+                      aria-label={t("eventDetailsDialog.editName")}
+                      className="h-7 w-7"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </DrawerTitle>
+              )}
+              {headerDescription && (
+                <p className="w-full text-sm text-muted-foreground text-left">
+                  {headerDescription}
+                </p>
+              )}
+            </DrawerHeader>
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6">
+              {detailsBody}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+            <DialogHeader>
+              {headerTitle && (
+                <DialogTitle className="text-xl font-bold flex items-center gap-2 text-foreground">
+                  <BookOpen className="h-6 w-6 shrink-0" />
+                  <span>{headerTitle}</span>
+                  {canEditName && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleOpenTimeEdit}
+                      aria-label={t("eventDetailsDialog.editName")}
+                      className="h-7 w-7"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                </DialogTitle>
+              )}
+              {headerDescription && (
+                <DialogDescription className="text-muted-foreground">
+                  {headerDescription}
+                </DialogDescription>
+              )}
+            </DialogHeader>
+            {detailsBody}
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <AttachRealizationDialog
+        open={attachDialogOpen}
+        onOpenChange={setAttachDialogOpen}
+        event={event}
+      />
+
+      <Dialog
+        open={hideCourseDialogOpen}
+        onOpenChange={setHideCourseDialogOpen}
+      >
+        <DialogContent className="sm:max-w-md" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>
+              {t("eventDetailsDialog.hideCourseDialog.title")}
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription asChild>
+            <div className="space-y-3">
+              <p>{t("eventDetailsDialog.hideCourseDialog.line1")}</p>
+              <p>{t("eventDetailsDialog.hideCourseDialog.line2")}</p>
+              <p>{t("eventDetailsDialog.hideCourseDialog.line3")}</p>
+            </div>
+          </DialogDescription>
+          <DialogFooter>
+            <ActionButton
+              onClick={() => setHideCourseDialogOpen(false)}
+              variant="subtle"
+              className="w-full sm:w-auto"
+            >
+              {t("eventDetailsDialog.hideCourseDialog.cancel")}
+            </ActionButton>
+            <ActionButton
+              onClick={handleConfirmHideCourse}
+              variant="danger"
+              className="w-full sm:w-auto"
+            >
+              {t("eventDetailsDialog.hideCourseDialog.confirm")}
+            </ActionButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editWarningOpen} onOpenChange={setEditWarningOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("eventTimeEditWarning.title")}</DialogTitle>
+          </DialogHeader>
+          <DialogDescription asChild>
+            <div className="space-y-3">
+              <p>
+                <Trans
+                  i18nKey="eventTimeEditWarning.description"
+                  t={t}
+                  components={{ strong: <strong /> }}
+                />
+              </p>
+            </div>
+          </DialogDescription>
+          <DialogFooter>
+            <ActionButton
+              onClick={() => setEditWarningOpen(false)}
+              variant="subtle"
+              className="w-full sm:w-auto"
+            >
+              {t("eventTimeEditWarning.cancel")}
+            </ActionButton>
+            <ActionButton
+              onClick={handleConfirmTimeEditWarning}
+              variant="primary"
+              className="w-full sm:w-auto"
+            >
+              {t("eventTimeEditWarning.confirm")}
+            </ActionButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <EventTimeEditDialog
+        open={editTimeParam === "true"}
+        onOpenChange={(nextOpen: boolean) =>
+          setEditTimeParam(nextOpen ? "true" : null)
+        }
+        event={event}
+        allowNameEditing={allowNameEditing && isManualCustomEvent}
+      />
+
+      <EventLocationEditDialog
+        open={locationEditDialogOpen}
+        onOpenChange={setLocationEditDialogOpen}
+        event={event}
+      />
+    </>
+  );
+};
+
+export default EventDetailsDialog;

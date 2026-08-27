@@ -1,0 +1,23 @@
+import { Navigate, useSearchParams } from "react-router-dom";
+import i18n from "../i18n";
+import { useCalendarStore } from "../state/state-management";
+
+/**
+ * Smart root component that redirects to /app/<calendar-id> if user has a calendar configured,
+ * unless they explicitly want to see the landing page (via ?landing query param)
+ */
+export default function RootRedirect() {
+  const [searchParams] = useSearchParams();
+  const { getActiveCalendar } = useCalendarStore();
+  const activeCalendar = getActiveCalendar();
+
+  const hasActiveCalendar = Boolean(activeCalendar);
+  const forceLanding = searchParams.has("landing");
+
+  if (hasActiveCalendar && !forceLanding && activeCalendar) {
+    return <Navigate to={`/app/${activeCalendar.id}`} replace />;
+  }
+
+  const locale = i18n.language?.startsWith("fi") ? "fi" : "en";
+  return <Navigate to={`/${locale}`} replace />;
+}

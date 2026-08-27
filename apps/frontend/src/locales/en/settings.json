@@ -1,0 +1,198 @@
+{
+  "title": "Settings",
+  "subtitle": "Customize the application appearance and functionality",
+  "navigation": {
+    "contents": "Contents"
+  },
+  "sections": {
+    "general": {
+      "title": "General Settings",
+      "subtitle": "Language and view configuration",
+      "language": {
+        "label": "Application Language",
+        "subtitle": "Choose your preferred language"
+      },
+      "advancedGroup": {
+        "title": "Advanced & Technical",
+        "subtitle": "Settings for power users and developers"
+      }
+    },
+    "font": {
+      "title": "Font Settings",
+      "subtitle": "Choose application font",
+      "options": {
+        "gabarito-open-sans": {
+          "label": "Gabarito (default)",
+          "subtitle": "Legacy display font"
+        },
+        "system": {
+          "label": "System Font",
+          "subtitle": "Uses device default font"
+        },
+        "lexend": {
+          "label": "Lexend Font",
+          "subtitle": "Optimized for readability"
+        }
+      }
+    },
+    "view": {
+      "title": "View Settings",
+      "subtitle": "Customize calendar view",
+      "showWeekends": {
+        "label": "Always show weekends",
+        "subtitle": "Weekends are already automatically shown if they contain events"
+      },
+      "allowCustomEvents": {
+        "label": "Show custom events",
+        "subtitle": "Allow the creation and display of custom events you add yourself"
+      },
+      "showCourseId": {
+        "label": "Show course ID in schedule",
+        "subtitle": "Display the realization ID at the end of each course name"
+      },
+      "hiddenEventOpacity": {
+        "label": "Hidden event opacity",
+        "subtitle": "How faded hidden events appear ({{value}}%)"
+      },
+      "squeezeWeekOnMobile": {
+        "label": "Squeeze week view on mobile",
+        "subtitle": "Fit the entire week into the screen width on mobile devices without horizontal scrolling. NOTE! This may make the view cramped on small screens. Not recommended for general users."
+      },
+      "showTotalHours": {
+        "label": "Show total hours",
+        "subtitle": "Display the sum of non-hidden event hours in day and week headers"
+      }
+    },
+    "styling": {
+      "title": "Styling",
+      "subtitle": "Control design elements and page aesthetics",
+      "font": {
+        "label": "Application Font",
+        "subtitle": "Choose the font used throughout the application"
+      },
+      "theme": {
+        "label": "Accent color",
+        "subtitle": "Choose the timetable accent palette",
+        "customize": "Choose color"
+      },
+      "themeDialog": {
+        "title": "Choose accent color",
+        "description": "Changes accent colors without overriding light or dark mode"
+      },
+      "enhancedDialogs": {
+        "label": "Use frosted glass dialogs",
+        "subtitle": "Enable gradient backgrounds and blur for dialogs to make them more visually appealing. If this negatively impacts performance, you can disable it."
+      },
+      "cat": {
+        "label": "🐱",
+        "subtitle": "Adds a companion that follows you around"
+      },
+      "appearance": {
+        "label": "Appearance",
+        "subtitle": "Follow your device or choose light or dark mode",
+        "options": {
+          "system": "System",
+          "light": "Light",
+          "dark": "Dark"
+        }
+      }
+    },
+    "language": {
+      "title": "Language Settings",
+      "subtitle": "Choose your preferred language"
+    },
+    "calendar": {
+      "title": "Calendar Management",
+      "subtitle": "Manage your calendars",
+      "manage": "Manage",
+      "calendarLabel": "Active Calendar",
+      "notConfigured": "No calendar configured",
+      "configured": "{{name}}",
+      "manageCalendars": "Manage calendars",
+      "linkCalendar": "Link calendar"
+    },
+    "theme": {
+      "title": "Theme Settings",
+      "subtitle": "Choose application color scheme",
+      "themes": {
+        "default": {
+          "name": "Blue",
+          "description": "-"
+        },
+        "purple": {
+          "name": "Violet",
+          "description": "-"
+        },
+        "dark-pink": {
+          "name": "Magenta",
+          "description": "-"
+        },
+        "boring": {
+          "name": "Graphite",
+          "description": "-"
+        },
+        "frog": {
+          "name": "Legacy Frog",
+          "description": "-"
+        },
+        "forest": {
+          "name": "Forest",
+          "description": "-"
+        },
+        "muted-coral": {
+          "name": "Coral",
+          "description": "-"
+        },
+        "casual-ruby": {
+          "name": "Ruby",
+          "description": "-"
+        },
+        "olive": {
+          "name": "Olive",
+          "description": "-"
+        },
+        "gold-rush": {
+          "name": "Amber",
+          "description": "-"
+        },
+        "dyne": {
+          "name": "Amber Navy",
+          "description": "-"
+        }
+      }
+    },
+    "actions": {
+      "title": "Actions",
+      "subtitle": "Restore default settings",
+      "resetButton": "Restore default settings",
+      "resetSubtitle": "Reset all settings to their default values",
+      "resetAllButton": "Reset entire application",
+      "resetAllSubtitle": "Clear all saved settings and all calendars from this device",
+      "resetAllConfirmTitle": "Reset entire application?",
+      "resetAllConfirmDescription": "This will clear your saved settings and remove all calendars from this device. This action cannot be undone.",
+      "resetAllCancel": "Cancel",
+      "resetAllConfirm": "Reset everything"
+    },
+    "debug": {
+      "title": "Configuration",
+      "subtitle": "Current settings (for developers)"
+    },
+    "technical": {
+      "title": "Technical",
+      "subtitle": "Settings for power users and developers",
+      "enableCommitNotifications": "Enable commit notifications",
+      "enableCommitNotificationsSubtitle": "Show toast notifications when new commits are pushed to the repository"
+    },
+    "development": {
+      "title": "Development Utilities",
+      "subtitle": "Tools for developers and testers",
+      "enableEventGenerator": "Enable event generator",
+      "enableEventGeneratorSubtitle": "Generate random events for testing purposes",
+      "resetCommitCache": "Reset commit cache",
+      "resetCommitCacheSubtitle": "Clear the list of seen commits to receive notifications again"
+    }
+  },
+  "skipToTimetable": "Skip to timetable",
+  "openTimetable": "Open timetable",
+  "openSettings": "Open settings"
+}

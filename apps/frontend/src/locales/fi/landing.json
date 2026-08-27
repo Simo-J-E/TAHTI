@@ -1,0 +1,37 @@
+{
+  "hero": {
+    "eyebrow": "Lukujärjestys ilman turhaa",
+    "title": "TAHTI",
+    "subtitle": "Nopea lukujärjestysnäkymä Turun AMK:lle. Viikko on käyttöliittymän keskipiste: selkeät tapahtumat, hyödylliset tiedot ja hallinta ilman ylimääräistä hälyä.",
+    "cta": "Avaa lukujärjestys",
+    "note": "Ei vaadi käyttäjätiliä"
+  },
+  "preview": {
+    "label": "Esimerkki TAHTI:n viikkonäkymästä",
+    "week": "Viikko 35",
+    "date": "Torstai 27. elokuuta",
+    "today": "Tänään",
+    "software": "Ohjelmistokehitys",
+    "math": "Insinöörimatematiikka",
+    "project": "Projektityöpaja"
+  },
+  "features": {
+    "accessible": {
+      "title": "Saavutettava oletuksena",
+      "text": "Näppäimistökäyttö, semanttiset ohjaimet, näkyvä kohdistus ja ruudunlukijalle ymmärrettävät tapahtumatiedot."
+    },
+    "appearance": {
+      "title": "Järjestelmä, vaalea tai tumma",
+      "text": "TAHTI seuraa laitteen asetusta ensimmäisellä käyttökerralla ja antaa valita ulkoasun myös itse."
+    },
+    "languages": {
+      "title": "Suomi ja englanti",
+      "text": "Käyttöliittymä sekä päivämäärät toimivat molemmilla kielillä ilman sekakielisiä näkymiä."
+    }
+  },
+  "about": {
+    "title": "Tehty lukujärjestystä varten",
+    "p1": "TAHTI on nykyisen avoimen lukujärjestyssovelluksen uudistettu versio. Toimivat kalenteri-integraatiot, omat tapahtumat ja paikalliset asetukset säilyvät eikä datakerrosta korvata.",
+    "p2": "Käyttöliittymä on suunniteltu toimimaan puhelimella, tabletilla ja työpöydällä sekä pysymään ymmärrettävänä ilman pelkkään väriin perustuvaa tietoa."
+  }
+}

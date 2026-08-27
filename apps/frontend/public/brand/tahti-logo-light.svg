@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 96" role="img" aria-labelledby="title desc">
+  <title id="title">TAHTI</title>
+  <desc id="desc">TAHTI timetable application logo.</desc>
+  <g transform="translate(0 8)">
+    <rect width="80" height="80" rx="12" fill="#20242c"/>
+    <path d="M18 16h44v9H45v39H35V25H18z" fill="#f3eee7"/>
+    <rect x="17" y="35" width="13" height="10" rx="2" fill="#e47964"/>
+    <rect x="50" y="31" width="13" height="10" rx="2" fill="#e47964"/>
+    <rect x="50" y="49" width="13" height="10" rx="2" fill="#e47964"/>
+  </g>
+  <g transform="translate(105 3)" fill="#f3eee7">
+    <path d="M8 13h72v17H53v49H35V30H8z"/>
+    <path d="M96 79l28-66h20l28 66h-20l-5-13h-27l-5 13H96zm30-29h15l-7.5-20z"/>
+    <path d="M188 13h18v25h29V13h18v66h-18V54h-29v25h-18z"/>
+    <path d="M270 13h72v17h-27v49h-18V30h-27z"/>
+    <path d="M360 13h18v66h-18z"/>
+  </g>
+</svg>

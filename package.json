@@ -1,0 +1,38 @@
+{
+  "name": "tahti-timetable",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TAHTI - accessible timetable for Turku UAS students",
+  "workspaces": [
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "npm run dev:frontend",
+    "dev:frontend": "npm --workspace apps/frontend run dev",
+    "dev:backend": "npm --workspace apps/backend run dev",
+    "build": "npm --workspace apps/frontend run build",
+    "preview": "npm --workspace apps/frontend run preview",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write package.json apps/frontend/package.json apps/backend/package.json .github/workflows/*.yml README.md CONTRIBUTING.md SECURITY.md UPSTREAM.md",
+    "format:check": "prettier --check package.json apps/frontend/package.json apps/backend/package.json .github/workflows/*.yml README.md CONTRIBUTING.md SECURITY.md UPSTREAM.md",
+    "typecheck": "npm --workspace apps/frontend run typecheck && npm --workspace apps/backend run typecheck",
+    "test": "npm --workspace apps/frontend run test",
+    "test:a11y": "npm --workspace apps/frontend run test:a11y",
+    "test:e2e": "npm --workspace apps/frontend run test:e2e",
+    "standards": "node scripts/check-standards.mjs",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run standards && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "eslint": "^9.35.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript-eslint": "^8.41.0"
+  }
+}

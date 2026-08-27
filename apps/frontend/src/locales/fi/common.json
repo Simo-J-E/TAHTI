@@ -1,0 +1,46 @@
+{
+  "navigation": {
+    "schedule": "Lukujärjestys",
+    "settings": "Asetukset"
+  },
+  "actions": {
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "close": "Sulje",
+    "edit": "Muokkaa",
+    "delete": "Poista",
+    "add": "Lisää",
+    "copy": "Kopioi",
+    "or": "tai",
+    "dismiss": "Sulje",
+    "enabled": "Käytössä",
+    "disabled": "Pois käytöstä",
+    "reset": "Palauta"
+  },
+  "labels": {
+    "language": "Kieli",
+    "theme": "Teema",
+    "loading": "Lataa...",
+    "error": "Virhe",
+    "success": "Onnistui"
+  },
+  "messages": {
+    "noData": "Ei tietoja saatavilla",
+    "errorLoading": "Tietojen lataaminen epäonnistui",
+    "changes_saved": "Muutokset tallennettu onnistuneesti"
+  },
+  "calendars": {
+    "title": "Kalenterit",
+    "description": "Tarvitsetko vaihtoa eri lukujärjestysten välillä tai haluatko näyttää useita päällekkäin? Luo lisäkalentereita täältä!",
+    "active": "Aktiivinen",
+    "setActive": "Vaihda tähän kalenteriin",
+    "confirmDelete": "Poistetaanko tämä kalenteri?",
+    "calendarNamePlaceholder": "Oma kalenteri",
+    "icalUrls": "Kalenterilähteet",
+    "urlPlaceholder": "http://...",
+    "noUrls": "Ei vielä lähteitä. Lisää iCal-osoite aloittaaksesi.",
+    "createNew": "Uusi kalenteri",
+    "empty": "Luo ensimmäinen kalenterisi aloittaaksesi.",
+    "quickAdd": "Suositut kalenterit"
+  }
+}

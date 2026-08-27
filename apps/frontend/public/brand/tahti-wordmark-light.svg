@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 92" role="img" aria-labelledby="title">
+  <title id="title">TAHTI</title>
+  <g fill="#f3eee7">
+    <path d="M8 13h72v17H53v49H35V30H8z"/>
+    <path d="M96 79l28-66h20l28 66h-20l-5-13h-27l-5 13H96zm30-29h15l-7.5-20z"/>
+    <path d="M188 13h18v25h29V13h18v66h-18V54h-29v25h-18z"/>
+    <path d="M270 13h72v17h-27v49h-18V30h-27z"/>
+    <path d="M360 13h18v66h-18z"/>
+  </g>
+</svg>

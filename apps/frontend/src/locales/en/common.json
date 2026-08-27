@@ -1,0 +1,46 @@
+{
+  "navigation": {
+    "schedule": "Schedule",
+    "settings": "Settings"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "copy": "Copy",
+    "or": "or",
+    "dismiss": "Dismiss",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "reset": "Reset"
+  },
+  "labels": {
+    "language": "Language",
+    "theme": "Theme",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "messages": {
+    "noData": "No data available",
+    "errorLoading": "Failed to load data",
+    "changes_saved": "Changes saved successfully"
+  },
+  "calendars": {
+    "title": "Calendars",
+    "description": "Need to switch between schedules or overlay them? Create additional calendars here!",
+    "active": "Active",
+    "setActive": "Switch to this calendar",
+    "confirmDelete": "Delete this calendar?",
+    "calendarNamePlaceholder": "My calendar",
+    "icalUrls": "Calendar sources",
+    "urlPlaceholder": "http://...",
+    "noUrls": "No sources yet. Add an iCal URL to get started.",
+    "createNew": "New Calendar",
+    "empty": "Create your first calendar to get started.",
+    "quickAdd": "Popular calendars"
+  }
+}

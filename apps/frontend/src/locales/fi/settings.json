@@ -1,0 +1,198 @@
+{
+  "title": "Asetukset",
+  "subtitle": "Mukauta sovelluksen ulkoasua ja toimintoja",
+  "navigation": {
+    "contents": "Sisältö"
+  },
+  "sections": {
+    "general": {
+      "title": "Yleiset asetukset",
+      "subtitle": "Kieli- ja näkymäasetukset",
+      "language": {
+        "label": "Sovelluksen kieli",
+        "subtitle": "Valitse haluamasi kieli"
+      },
+      "advancedGroup": {
+        "title": "Edistyneet & tekniset",
+        "subtitle": "Asetukset tehokäyttäjille ja kehittäjille"
+      }
+    },
+    "font": {
+      "title": "Fonttiasetukset",
+      "subtitle": "Valitse sovelluksen fontti",
+      "options": {
+        "gabarito-open-sans": {
+          "label": "Gabarito (default)",
+          "subtitle": "Vanha näyttöfontti"
+        },
+        "system": {
+          "label": "Järjestelmäfontti",
+          "subtitle": "Käyttää laitteen oletusfonttia"
+        },
+        "lexend": {
+          "label": "Lexend-fontti",
+          "subtitle": "Optimoitu luettavuudelle"
+        }
+      }
+    },
+    "view": {
+      "title": "Näkymäasetukset",
+      "subtitle": "Mukauta kalenterinäkymää",
+      "showWeekends": {
+        "label": "Näytä viikonloput aina",
+        "subtitle": "Viikonloput näytetään jo automaattisesti jos niissä on tapahtumia"
+      },
+      "allowCustomEvents": {
+        "label": "Näytä omat tapahtumat",
+        "subtitle": "Sallii omien tapahtumien luomisen"
+      },
+      "showCourseId": {
+        "label": "Näytä toteutuksen tunnus lukujärjestyksessä",
+        "subtitle": "Näytä toteutuksen ID kurssinimen lopussa (esim. TE00DH11-3001)"
+      },
+      "hiddenEventOpacity": {
+        "label": "Piilotettujen tapahtumien läpinäkyvyys",
+        "subtitle": "Kuinka haaleina piilotetut tapahtumat näkyvät ({{value}}%)"
+      },
+      "squeezeWeekOnMobile": {
+        "label": "Sovita viikkonäkymä mobiilissa",
+        "subtitle": "Sovita koko viikko näytön leveyteen mobiililaitteilla ilman vaakasuuntaista vieritystä. HUOM! Tämä voi tehdä näkymästä tukalan pienillä näytöillä. Ei suositella peruskäyttäjälle."
+      },
+      "showTotalHours": {
+        "label": "Näytä kokonaistunnit",
+        "subtitle": "Näytä piilottamattomien tapahtumatuntien summa päivä- ja viikkonäkymän otsikoissa"
+      }
+    },
+    "styling": {
+      "title": "Tyylitys",
+      "subtitle": "Hallitse visuaalisia elementtejä ja sivusuunnittelua",
+      "font": {
+        "label": "Sovelluksen fontti",
+        "subtitle": "Valitse sovelluksessa käytettävä fontti"
+      },
+      "theme": {
+        "label": "Korostusväri",
+        "subtitle": "Valitse lukujärjestyksen korostusväripaletti",
+        "customize": "Valitse väri"
+      },
+      "themeDialog": {
+        "title": "Valitse korostusväri",
+        "description": "Vaihtaa korostusvärejä muuttamatta vaaleaa tai tummaa tilaa"
+      },
+      "enhancedDialogs": {
+        "label": "'Frosted Glass'-dialogit",
+        "subtitle": "Tekee dialogien taustoista sumeampia ja kiinnostavampia. Mikäli tämä vaikuttaa negatiivisesti suorituskykyyn, voit poistaa sen käytöstä."
+      },
+      "cat": {
+        "label": "🐱",
+        "subtitle": "Lisää kumppanin, joka seuraa sinua ympäriinsä"
+      },
+      "appearance": {
+        "label": "Ulkoasu",
+        "subtitle": "Seuraa laitteen asetusta tai valitse vaalea tai tumma tila",
+        "options": {
+          "system": "Järjestelmä",
+          "light": "Vaalea",
+          "dark": "Tumma"
+        }
+      }
+    },
+    "language": {
+      "title": "Kieliasetukset",
+      "subtitle": "Valitse haluamasi kieli"
+    },
+    "calendar": {
+      "title": "Kalenterien hallinta",
+      "subtitle": "Hallinnoi kalentereitasi",
+      "manage": "Hallitse",
+      "calendarLabel": "Aktiivinen kalenteri",
+      "notConfigured": "Ei kalenteria määritettynä",
+      "configured": "{{name}}",
+      "manageCalendars": "Hallinnoi kalentereita",
+      "linkCalendar": "Linkkaa kalenteri"
+    },
+    "theme": {
+      "title": "Teema-asetukset",
+      "subtitle": "Valitse sovelluksen värimaailma",
+      "themes": {
+        "default": {
+          "name": "Sininen",
+          "description": "-"
+        },
+        "purple": {
+          "name": "Violetti",
+          "description": "-"
+        },
+        "dark-pink": {
+          "name": "Magenta",
+          "description": "-"
+        },
+        "boring": {
+          "name": "Grafiitti",
+          "description": "-"
+        },
+        "frog": {
+          "name": "Vanha sammakko",
+          "description": "-"
+        },
+        "forest": {
+          "name": "Metsä",
+          "description": "-"
+        },
+        "muted-coral": {
+          "name": "Koralli",
+          "description": "-"
+        },
+        "casual-ruby": {
+          "name": "Rubiini",
+          "description": "-"
+        },
+        "olive": {
+          "name": "Oliivi",
+          "description": "-"
+        },
+        "gold-rush": {
+          "name": "Meripihka",
+          "description": "-"
+        },
+        "dyne": {
+          "name": "Meripihka ja laivastonsininen",
+          "description": "-"
+        }
+      }
+    },
+    "actions": {
+      "title": "Toiminnot",
+      "subtitle": "Palauta oletusasetukset",
+      "resetButton": "Palauta oletusasetukset",
+      "resetSubtitle": "Palauta kaikki asetukset niiden oletusarvoihin",
+      "resetAllButton": "Nollaa koko sovellus",
+      "resetAllSubtitle": "Poista kaikki tallennetut asetukset ja kalenterit tältä laitteelta",
+      "resetAllConfirmTitle": "Nollataanko koko sovellus?",
+      "resetAllConfirmDescription": "Tämä poistaa tallennetut asetuksesi ja kaikki kalenterit tältä laitteelta. Toimintoa ei voi perua.",
+      "resetAllCancel": "Peruuta",
+      "resetAllConfirm": "Nollaa kaikki"
+    },
+    "debug": {
+      "title": "Konfiguraatio",
+      "subtitle": "Nykyiset asetukset (kehittäjille)"
+    },
+    "technical": {
+      "title": "Tekninen",
+      "subtitle": "Asetukset tehokäyttäjille ja kehittäjille",
+      "enableCommitNotifications": "Ota commit-ilmoitukset käyttöön",
+      "enableCommitNotificationsSubtitle": "Näytä ilmoituksia kun uusia committeja työnnetään repositorioon"
+    },
+    "development": {
+      "title": "Kehitystyökalut",
+      "subtitle": "Työkaluja kehittäjille ja testaajille",
+      "enableEventGenerator": "Ota tapahtumageneraattori käyttöön",
+      "enableEventGeneratorSubtitle": "Luo satunnaisia tapahtumia testaustarkoituksiin",
+      "resetCommitCache": "Tyhjennä commit-välimuisti",
+      "resetCommitCacheSubtitle": "Tyhjennä nähtyjen committien lista saadaksesi ilmoitukset uudelleen"
+    }
+  },
+  "skipToTimetable": "Siirry lukujärjestykseen",
+  "openTimetable": "Avaa lukujärjestys",
+  "openSettings": "Avaa asetukset"
+}

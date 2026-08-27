@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">TAHTI symbol</title>
+  <desc id="desc">A geometric timetable mark formed from schedule blocks.</desc>
+  <rect width="64" height="64" rx="10" fill="#20242c"/>
+  <path d="M15 13h34v7H36v31h-8V20H15z" fill="#f3eee7"/>
+  <rect x="14" y="28" width="10" height="8" rx="2" fill="#e47964"/>
+  <rect x="40" y="25" width="10" height="8" rx="2" fill="#e47964"/>
+  <rect x="40" y="39" width="10" height="8" rx="2" fill="#e47964"/>
+</svg>

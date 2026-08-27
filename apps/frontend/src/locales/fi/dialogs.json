@@ -1,0 +1,151 @@
+{
+  "realizationDialog": {
+    "loading": "Ladataan toteutustietoja...",
+    "error": {
+      "title": "Virhe",
+      "message": "Toteutustietojen lataaminen epäonnistui"
+    },
+    "basicInfo": {
+      "title": "Perustiedot",
+      "courseId": "Kurssikoodi",
+      "courseCode": "Koodi",
+      "teachingLanguage": "Opetuskieli",
+      "credits": "Laajuus",
+      "period": "Jakso",
+      "location": "Sijainti",
+      "evaluationScale": "Arviointiasteikko",
+      "campus": "Kampus"
+    },
+    "schedule": {
+      "title": "Toteutusaika",
+      "description": "Toteutusjakso ja aikataulu",
+      "starts": "Alkaa",
+      "ends": "Päättyy"
+    },
+    "enrollment": {
+      "title": "Ilmoittautuminen",
+      "starts": "Alkaa",
+      "ends": "Päättyy"
+    },
+    "duration": {
+      "title": "Kesto",
+      "description": "Kurssin kesto"
+    },
+    "instructor": {
+      "title": "Opettajat",
+      "description": "Kurssin opettaja(t)"
+    },
+    "groups": {
+      "title": "Opiskelijaryhmät",
+      "description": "Kohderyhmät"
+    },
+    "learningMaterial": {
+      "title": "Oppimateriaali"
+    },
+    "furtherInformation": {
+      "title": "Lisätietoja"
+    },
+    "events": {
+      "title": "Tapahtumat",
+      "upcoming": "Tulevat",
+      "completed": "Suoritetut",
+      "overlapping": "Päällekkäiset",
+      "overlapsWith": "Päällekkäin: {{event}}"
+    },
+    "description": {
+      "title": "Kuvaus",
+      "description": "Kurssin kuvaus"
+    }
+  },
+  "eventDetailsDialog": {
+    "basicInfo": "Perustiedot",
+    "schedule": "Aikataulu",
+    "location": "Sijainti",
+    "instructor": "Opettaja",
+    "groups": "Ryhmät",
+    "date": "Päivämäärä",
+    "time": "Aika",
+    "duration": "Kesto",
+    "editName": "Muokkaa nimeä",
+    "editLocation": "Muokkaa sijaintia",
+    "teachers": "Opettajat",
+    "studentGroups": "Opiskelijaryhmät",
+    "showRealizationDetails": "Näytä toteutustiedot",
+    "attachRealization": {
+      "title": "Liitä toteutukseen",
+      "description": "Tätä tapahtumaa ei voitu liittää automaattisesti toteutukseen. Valitse seuraavista vaihtoehdoista liittääksesi sen manuaalisesti!",
+      "search": "Hae nimellä tai koodilla",
+      "button": "Liitä toteutukseen",
+      "change": "Vaihda liitos",
+      "attach": "Liitä",
+      "attached": "Liitetty",
+      "current": "Tällä hetkellä liitetty",
+      "detach": "Irrota",
+      "empty": "Haku ei löytänyt toteutuksia."
+    },
+    "noRealizationData": "Tälle tapahtumalle ei ole saatavilla yksityiskohtaisia toteutustietoja.",
+    "noRealizationWhyNot": "Miksi ei?",
+    "noRealizationWhyNotExplanation": "TAHTI liittää tapahtumat toteutuksiin nimen toteutuskoodin perusteella (esim. kh00cz65-3020). Jos tämä toteutuskoodi puuttuu, sovellus ei voi tietää, mihin toteutukseen tapahtuma kuuluu. Jokaisessa kalenterisi tapahtumassa pitäisi oletuksena olla toteutuskoodi.",
+    "hideCourse": "Piilota toteutus",
+    "showCourse": "Näytä toteutus",
+    "hideCourseDialog": {
+      "title": "Piilota koko toteutus?",
+      "line1": "Olet piilottamassa kaikki tapahtumat, jotka voidaan liittää tähän toteutukseen.",
+      "line2": "Huomautamme, että tämä on tehokas tapa siivota kalenteriasi, mutta ole varovainen, ettet piilota vahingossa toteutuksia, joita et tarkoittanut piilottaa.",
+      "line3": "Voit aina perua tämän.",
+      "confirm": "Piilota toteutus",
+      "cancel": "Peruuta"
+    }
+  },
+  "eventTimeEditWarning": {
+    "title": "Huomio tapahtumien muokkaamisesta",
+    "description": "Voit muokata tämän tapahtuman aikataulua. Muutos näkyy vain sinulle. <strong>Huomaathan</strong>, että muokkauksesi yliajetaan välittömästi, jos lukkarinpitäjät (opettajasi jne) muokkaavat tätä tapahtumaa millään tavalla.",
+    "cancel": "Peruuta",
+    "confirm": "Ymmärrän"
+  },
+  "eventTimeEditDialog": {
+    "title": "Muokkaa tapahtuman aikaa",
+    "titleWithName": "Muokkaa tapahtumaa",
+    "description": "Päivitä tämän tapahtuman päivä ja kellonaika.",
+    "descriptionWithName": "Päivitä tämän tapahtuman nimi, päivä ja kellonaika.",
+    "openButton": "Muokkaa aikaa",
+    "dateLabel": "Päivä",
+    "pickDate": "Valitse päivä",
+    "startTimeLabel": "Alkaa",
+    "endTimeLabel": "Päättyy",
+    "cancel": "Peruuta",
+    "save": "Tallenna",
+    "errors": {
+      "missingDate": "Valitse ensin päivä.",
+      "invalidRange": "Päättymisajan on oltava alkamisajan jälkeen."
+    }
+  },
+  "eventLocationEditDialog": {
+    "title": "Muokkaa tapahtuman sijaintia",
+    "description": "Päivitä tämän tapahtuman sijainti.",
+    "cancel": "Peruuta",
+    "save": "Tallenna"
+  },
+  "createEventDialog": {
+    "title": "Luo tapahtuma",
+    "description": "Lisää uusi tapahtuma lukujärjestykseesi.",
+    "nameLabel": "Nimi",
+    "namePlaceholder": "esim. Itsenäinen opiskelu (lock in)",
+    "dateLabel": "Päivä",
+    "pickDate": "Valitse päivä",
+    "startTimeLabel": "Alkaa",
+    "endTimeLabel": "Päättyy",
+    "moreOptions": "Lisäasetukset",
+    "locationLabel": "Sijainti (valinnainen)",
+    "locationPlaceholder": "esim. Taidon Portaat",
+    "colorLabel": "Väri (valinnainen)",
+    "colorDefault": "Käytä oletusta",
+    "cancel": "Peruuta",
+    "create": "Luo",
+    "errors": {
+      "missingName": "Anna tapahtumalle nimi.",
+      "missingDate": "Valitse ensin päivä.",
+      "invalidRange": "Päättymisajan on oltava alkamisajan jälkeen."
+    }
+  }
+}

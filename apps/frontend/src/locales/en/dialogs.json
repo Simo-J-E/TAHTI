@@ -1,0 +1,151 @@
+{
+  "realizationDialog": {
+    "loading": "Loading implementation details...",
+    "error": {
+      "title": "Error",
+      "message": "Failed to load implementation details"
+    },
+    "basicInfo": {
+      "title": "Basic Information",
+      "courseId": "Course ID",
+      "courseCode": "Code",
+      "teachingLanguage": "Teaching Language",
+      "credits": "Credits",
+      "period": "Period",
+      "location": "Location",
+      "evaluationScale": "Evaluation Scale",
+      "campus": "Campus"
+    },
+    "schedule": {
+      "title": "Implementation Period",
+      "description": "Implementation period and schedule",
+      "starts": "Starts",
+      "ends": "Ends"
+    },
+    "enrollment": {
+      "title": "Enrollment",
+      "starts": "Starts",
+      "ends": "Ends"
+    },
+    "duration": {
+      "title": "Duration",
+      "description": "Course duration"
+    },
+    "instructor": {
+      "title": "Teachers",
+      "description": "Course instructor(s)"
+    },
+    "groups": {
+      "title": "Student Groups",
+      "description": "Target groups"
+    },
+    "learningMaterial": {
+      "title": "Learning Materials"
+    },
+    "furtherInformation": {
+      "title": "Further Information"
+    },
+    "events": {
+      "title": "Events",
+      "upcoming": "Upcoming",
+      "completed": "Completed",
+      "overlapping": "Overlapping",
+      "overlapsWith": "Overlaps with {{event}}"
+    },
+    "description": {
+      "title": "Description",
+      "description": "Course description"
+    }
+  },
+  "eventDetailsDialog": {
+    "basicInfo": "Basic Information",
+    "schedule": "Schedule",
+    "location": "Location",
+    "instructor": "Instructor",
+    "groups": "Groups",
+    "date": "Date",
+    "time": "Time",
+    "duration": "Duration",
+    "editName": "Edit name",
+    "editLocation": "Edit location",
+    "teachers": "Teachers",
+    "studentGroups": "Student Groups",
+    "showRealizationDetails": "Show Implementation Details",
+    "attachRealization": {
+      "title": "Attach to realization",
+      "description": "This event could not be linked to a realization automatically. Choose from the options below to attach it manually!",
+      "search": "Search by name or code",
+      "button": "Attach to realization",
+      "change": "Change attachment",
+      "attach": "Attach",
+      "attached": "Attached",
+      "current": "Currently attached",
+      "detach": "Detach",
+      "empty": "No realizations matched your search."
+    },
+    "noRealizationData": "Detailed implementation information is not available for this event.",
+    "noRealizationWhyNot": "Why not?",
+    "noRealizationWhyNotExplanation": "TAHTI associates events to their classes by the Realization ID in their name (e.g. kh00cz65-3020). If this realization ID is missing, there is no way for the application to know what realization this belongs to. Each event in your calendar should, by default, have the realization ID in them.",
+    "hideCourse": "Hide course",
+    "showCourse": "Show course",
+    "hideCourseDialog": {
+      "title": "Hide entire course?",
+      "line1": "You're about to hide every event we can tie to this realization.",
+      "line2": "We want to note that this is a powerful way to clean up your calendar, but be careful not to accidentally hide realizations you didn't mean to hide.",
+      "line3": "You can always undo this.",
+      "confirm": "Hide course",
+      "cancel": "Cancel"
+    }
+  },
+  "eventTimeEditWarning": {
+    "title": "Notice about editing events",
+    "description": "You can edit this event's schedule. The change is visible only to you. <strong>Please note</strong> that your edit will be overwritten immediately if the schedule keepers (your teachers, etc.) modify this event in any way.",
+    "cancel": "Cancel",
+    "confirm": "I understand"
+  },
+  "eventTimeEditDialog": {
+    "title": "Edit event time",
+    "titleWithName": "Edit event",
+    "description": "Update the date and time for this event.",
+    "descriptionWithName": "Update the name, date and time for this event.",
+    "openButton": "Edit time",
+    "dateLabel": "Date",
+    "pickDate": "Pick a date",
+    "startTimeLabel": "Starts",
+    "endTimeLabel": "Ends",
+    "cancel": "Cancel",
+    "save": "Save",
+    "errors": {
+      "missingDate": "Please pick a date first.",
+      "invalidRange": "End time must be after start time."
+    }
+  },
+  "eventLocationEditDialog": {
+    "title": "Edit event location",
+    "description": "Update the location for this event.",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "createEventDialog": {
+    "title": "Create event",
+    "description": "Add a new event to your schedule.",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. lock in for physics",
+    "dateLabel": "Date",
+    "pickDate": "Pick a date",
+    "startTimeLabel": "Starts",
+    "endTimeLabel": "Ends",
+    "moreOptions": "More options",
+    "locationLabel": "Location (optional)",
+    "locationPlaceholder": "e.g. Taidon Portaat",
+    "colorLabel": "Color (optional)",
+    "colorDefault": "Use default",
+    "cancel": "Cancel",
+    "create": "Create",
+    "errors": {
+      "missingName": "Please enter a name.",
+      "missingDate": "Please pick a date first.",
+      "invalidRange": "End time must be after start time."
+    }
+  }
+}

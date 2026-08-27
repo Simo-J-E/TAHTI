@@ -1,0 +1,639 @@
+import ICAL from "ical.js";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { EventMetadataMap } from "../types/metadata";
+import type { ScheduleEvent } from "../types/schedule";
+import { ScheduleUtils } from "../utils/schedule-utils";
+import useCalendarStore from "./calendar-store";
+import { useEventMetadataStore } from "./event-metadata-store";
+import { useRealizationMetadataStore } from "./realization-metadata-store";
+
+interface ICalCache {
+  url: string;
+  calendarData: string;
+  hash: string;
+  lastFetched: Date;
+  lastUpdated: Date | null;
+}
+
+type CustomEventSource = "manual" | "additional";
+
+interface CustomEventTemplate {
+  id: string;
+  createdAtIso?: string;
+}
+
+interface LastCreatedManualEventDefaults {
+  name: string;
+  location?: string;
+  color?: string;
+}
+
+// ye
+export const CUSTOM_EVENT_TEMPLATE_ID_PREFIX = "meow-";
+const isValidDate = (value: Date) => !Number.isNaN(value.getTime());
+
+export const isCustomScheduleEventId = (eventId: string) =>
+  eventId.startsWith(CUSTOM_EVENT_TEMPLATE_ID_PREFIX);
+
+export const getCustomScheduleTemplateId = (eventId: string) => {
+  if (!isCustomScheduleEventId(eventId)) {
+    return null;
+  }
+  const [templateId] = eventId.split("__");
+  return templateId;
+};
+
+const createScheduleEventFromTemplate = (
+  title: string,
+  location: string,
+  startTime: Date,
+  endTime: Date,
+  id: string,
+): ScheduleEvent => {
+  const durationMs = endTime.getTime() - startTime.getTime();
+  const duration = durationMs / (1000 * 60 * 60);
+  const startHour = startTime.getHours() + startTime.getMinutes() / 60;
+  return {
+    id,
+    title,
+    location,
+    startTime,
+    endTime,
+    duration,
+    startHour,
+    color: ScheduleUtils.getSeededColor(title),
+    description: "",
+  };
+};
+
+const expandCustomEventTemplates = (
+  templates: CustomEventTemplate[],
+  _baseEvents: ScheduleEvent[],
+  metadataByEvent: EventMetadataMap,
+): ScheduleEvent[] => {
+  if (templates.length === 0) {
+    return [];
+  }
+
+  return templates.flatMap((template) => {
+    const metadata = metadataByEvent[template.id];
+    const timeMetadata = metadata?.time;
+    if (!timeMetadata) {
+      return [];
+    }
+
+    const baseStartTime = new Date(timeMetadata.startTimeIso);
+    const baseEndTime = new Date(timeMetadata.endTimeIso);
+    const resolvedTitle = metadata?.name || "Untitled Event";
+    const resolvedLocation = metadata?.location || "";
+
+    if (!isValidDate(baseStartTime) || !isValidDate(baseEndTime)) {
+      return [];
+    }
+
+    if (baseEndTime <= baseStartTime) {
+      return [];
+    }
+
+    return [
+      createScheduleEventFromTemplate(
+        resolvedTitle,
+        resolvedLocation,
+        baseStartTime,
+        baseEndTime,
+        template.id,
+      ),
+    ];
+  });
+};
+
+interface ScheduleState {
+  events: ScheduleEvent[];
+  customEventTemplates: CustomEventTemplate[];
+  lastCreatedManualEventDefaults: LastCreatedManualEventDefaults | null;
+  calendar: InstanceType<typeof ICAL.Component> | null;
+  isLoading: boolean;
+  isCheckingHash: boolean;
+  isFetchingCalendar: boolean;
+  error: string | null;
+  lastFetched: Date | null;
+  lastUpdated: Date | null;
+  icalCaches: Record<string, ICalCache>;
+  lastActiveCalendarId: string | null;
+
+  fetchSchedule: () => Promise<void>;
+  getEventsForDate: (date: Date) => ScheduleEvent[];
+  getEventsForWeek: (weekStart: Date) => { [key: string]: ScheduleEvent[] };
+  getEventById: (id: string) => ScheduleEvent | null;
+  refreshSchedule: () => Promise<void>;
+  clearError: () => void;
+  applyEventTimeOverride: (
+    eventId: string,
+    override: { startTimeIso: string; endTimeIso: string } | null,
+    fallbackOriginal?: { startTimeIso: string; endTimeIso: string },
+  ) => void;
+  getICalCacheInfo: () => {
+    url: string;
+    lastUpdated: Date | null;
+    lastFetched: Date;
+  }[];
+  addCustomEvent: (event: {
+    title: string;
+    location?: string;
+    startTime: Date;
+    endTime: Date;
+    source?: CustomEventSource;
+    color?: string;
+  }) => void;
+  clearCustomEvents: (options?: { source?: CustomEventSource }) => void;
+  getCustomEventTemplates: () => CustomEventTemplate[];
+  deleteCustomEvent: (eventId: string) => void;
+}
+
+export const useScheduleStore = create<ScheduleState>()(
+  persist(
+    (set, get) => ({
+      events: [],
+      customEventTemplates: [],
+      lastCreatedManualEventDefaults: null,
+      calendar: null,
+      isLoading: false,
+      isCheckingHash: false,
+      isFetchingCalendar: false,
+      error: null,
+      lastFetched: null,
+      lastUpdated: null,
+      icalCaches: {},
+      lastActiveCalendarId: null,
+
+      fetchSchedule: async () => {
+        const state = get();
+
+        const activeCalendar = useCalendarStore.getState().getActiveCalendar();
+        const currentCalendarId = activeCalendar?.id || null;
+        const customTemplates = state.customEventTemplates;
+        const { metadataByEvent } = useEventMetadataStore.getState();
+        const customEvents = expandCustomEventTemplates(
+          customTemplates,
+          [],
+          metadataByEvent,
+        );
+
+        const calendarChanged =
+          state.lastActiveCalendarId !== currentCalendarId;
+
+        if (
+          !calendarChanged &&
+          state.lastFetched &&
+          new Date().toDateString() === state.lastFetched.toDateString()
+        ) {
+          return;
+        }
+
+        if (calendarChanged) {
+          console.log("Active calendar changed, refreshing...");
+          set({
+            events: customEvents,
+            lastFetched: null,
+          });
+        }
+
+        const calendarUrls = activeCalendar?.icalUrls || [];
+
+        if (calendarUrls.length === 0) {
+          set({
+            events: customEvents,
+            isLoading: false,
+            isCheckingHash: false,
+            isFetchingCalendar: false,
+          });
+          return;
+        }
+
+        const hasExistingData = state.events.length > 0;
+        set({
+          isLoading: !hasExistingData,
+          isCheckingHash: true,
+          error: null,
+        });
+
+        try {
+          const { metadataByRealization } =
+            useRealizationMetadataStore.getState();
+          const eventsByUid = new Map<string, ScheduleEvent>();
+          const newIcalCaches: Record<string, ICalCache> = {
+            ...state.icalCaches,
+          };
+          let eventIndexCounter = 0;
+          let oldestUpdateTime: Date | null = null;
+
+          for (const url of calendarUrls) {
+            try {
+              const cachedEntry = state.icalCaches[url];
+              let shouldFetch = true;
+              let calendarData = "";
+              let hash = "";
+              let icalLastUpdated: Date | null = null;
+
+              if (cachedEntry && !calendarChanged) {
+                try {
+                  const { hash: latestHash } =
+                    await ScheduleUtils.checkCalendarHash(url);
+
+                  if (cachedEntry.hash === latestHash) {
+                    console.log(`Hash matches for ${url} - using cached data`);
+                    shouldFetch = false;
+                    calendarData = cachedEntry.calendarData;
+                    hash = cachedEntry.hash;
+                    icalLastUpdated = cachedEntry.lastUpdated;
+                  }
+                } catch (hashError) {
+                  console.error(`Error checking hash for ${url}:`, hashError);
+                }
+              }
+
+              if (shouldFetch) {
+                console.log(`Fetching calendar from ${url}`);
+                const result = await ScheduleUtils.retrieveScheduleFromUrl(url);
+                calendarData = result.calendarData;
+                hash = result.hash;
+
+                const parsedLastUpdated = result.lastUpdated
+                  ? new Date(result.lastUpdated)
+                  : null;
+                icalLastUpdated =
+                  parsedLastUpdated &&
+                  !Number.isNaN(parsedLastUpdated.getTime())
+                    ? parsedLastUpdated
+                    : null;
+
+                newIcalCaches[url] = {
+                  url,
+                  calendarData,
+                  hash,
+                  lastFetched: new Date(),
+                  lastUpdated: icalLastUpdated,
+                };
+              }
+
+              const jcalData = ICAL.parse(calendarData);
+              const calendar = new ICAL.Component(jcalData);
+              const vevents = calendar.getAllSubcomponents("vevent");
+
+              for (const vevent of vevents) {
+                const event = ScheduleUtils.convertToScheduleEvent(
+                  vevent,
+                  eventIndexCounter++,
+                  metadataByRealization,
+                );
+                if (!eventsByUid.has(event.id)) {
+                  eventsByUid.set(event.id, event);
+                }
+              }
+
+              if (icalLastUpdated) {
+                if (!oldestUpdateTime || icalLastUpdated < oldestUpdateTime) {
+                  oldestUpdateTime = icalLastUpdated;
+                }
+              }
+            } catch (urlError) {
+              console.error(`Error fetching calendar from ${url}:`, urlError);
+            }
+          }
+
+          const allEvents = Array.from(eventsByUid.values());
+          const { metadataByEvent, clearEventTimeOverride } =
+            useEventMetadataStore.getState();
+          const overriddenEvents = allEvents.map((event) => {
+            const override = metadataByEvent[event.id]?.time;
+            if (!override) {
+              return event;
+            }
+            const currentHash = ScheduleUtils.getEventDefaultHash(
+              event.title,
+              event.startTime,
+              event.endTime,
+            );
+            if (currentHash !== override.defaultHash) {
+              clearEventTimeOverride(event.id);
+              return event;
+            }
+            return ScheduleUtils.applyTimeOverride(
+              event,
+              override.startTimeIso,
+              override.endTimeIso,
+            );
+          });
+          const now = new Date();
+          const generatedCustomEvents = expandCustomEventTemplates(
+            customTemplates,
+            overriddenEvents,
+            metadataByEvent,
+          );
+
+          set({
+            events: [...overriddenEvents, ...generatedCustomEvents],
+            isLoading: false,
+            isCheckingHash: false,
+            isFetchingCalendar: false,
+            lastFetched: now,
+            lastUpdated: oldestUpdateTime,
+            icalCaches: newIcalCaches,
+            lastActiveCalendarId: currentCalendarId,
+          });
+        } catch (error) {
+          set({
+            isLoading: false,
+            isCheckingHash: false,
+            isFetchingCalendar: false,
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch schedule",
+          });
+        }
+      },
+
+      getEventsForDate: (date: Date) => {
+        const { events } = get();
+        return events.filter((event) => {
+          const eventDate = new Date(event.startTime);
+          return eventDate.toDateString() === date.toDateString();
+        });
+      },
+
+      getEventsForWeek: (weekStart: Date) => {
+        const { events } = get();
+        const weekEvents: { [key: string]: ScheduleEvent[] } = {};
+
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(weekStart);
+          day.setDate(weekStart.getDate() + i);
+          const dayKey = day.toDateString();
+          weekEvents[dayKey] = events.filter((event) => {
+            const eventDate = new Date(event.startTime);
+            return eventDate.toDateString() === dayKey;
+          });
+        }
+
+        return weekEvents;
+      },
+
+      getEventById: (id: string) => {
+        const { events } = get();
+        return events.find((event) => event.id === id) || null;
+      },
+
+      refreshSchedule: async () => {
+        set({ lastFetched: null });
+        await get().fetchSchedule();
+      },
+
+      clearError: () => set({ error: null }),
+
+      applyEventTimeOverride: (eventId, override, fallbackOriginal) => {
+        set((state) => {
+          const existing = state.events.find((event) => event.id === eventId);
+          if (!existing) {
+            return state;
+          }
+          if (override) {
+            const updated = ScheduleUtils.applyTimeOverride(
+              existing,
+              override.startTimeIso,
+              override.endTimeIso,
+            );
+            return {
+              events: state.events.map((event) =>
+                event.id === eventId ? updated : event,
+              ),
+            };
+          }
+          const metadataOverride = useEventMetadataStore
+            .getState()
+            .getEventTimeOverride(eventId);
+          const original = metadataOverride
+            ? {
+                startTimeIso: metadataOverride.originalStartTimeIso,
+                endTimeIso: metadataOverride.originalEndTimeIso,
+              }
+            : fallbackOriginal;
+          if (!original) {
+            return state;
+          }
+          const restored = ScheduleUtils.applyTimeOverride(
+            existing,
+            original.startTimeIso,
+            original.endTimeIso,
+          );
+          return {
+            events: state.events.map((event) =>
+              event.id === eventId ? restored : event,
+            ),
+          };
+        });
+      },
+
+      getICalCacheInfo: () => {
+        const state = get();
+        return Object.values(state.icalCaches).map((cache) => ({
+          url: cache.url,
+          lastUpdated: cache.lastUpdated,
+          lastFetched: cache.lastFetched,
+        }));
+      },
+
+      addCustomEvent: ({
+        title,
+        location,
+        startTime,
+        endTime,
+        source,
+        color,
+      }) => {
+        const template: CustomEventTemplate = {
+          id: `${CUSTOM_EVENT_TEMPLATE_ID_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          createdAtIso: new Date().toISOString(),
+        };
+
+        useEventMetadataStore.getState().setEventMetadata(template.id, {
+          name: title,
+          location: location ?? "",
+          source: source ?? "manual",
+          color,
+          time: {
+            startTimeIso: startTime.toISOString(),
+            endTimeIso: endTime.toISOString(),
+            originalStartTimeIso: startTime.toISOString(),
+            originalEndTimeIso: endTime.toISOString(),
+            defaultHash: ScheduleUtils.getEventDefaultHash(
+              title,
+              startTime,
+              endTime,
+            ),
+            updatedAt: new Date().toISOString(),
+          },
+        });
+
+        set((state) => {
+          const currentTemplates = state.customEventTemplates;
+          const nextTemplates = [...currentTemplates, template];
+          const baseEvents = state.events.filter(
+            (event) => !isCustomScheduleEventId(event.id),
+          );
+          const { metadataByEvent } = useEventMetadataStore.getState();
+          const generatedCustomEvents = expandCustomEventTemplates(
+            nextTemplates,
+            baseEvents,
+            metadataByEvent,
+          );
+
+          return {
+            customEventTemplates: nextTemplates,
+            events: [...baseEvents, ...generatedCustomEvents],
+            lastCreatedManualEventDefaults:
+              source === "manual"
+                ? {
+                    name: title,
+                    location: location?.trim() || undefined,
+                    color,
+                  }
+                : state.lastCreatedManualEventDefaults,
+          };
+        });
+      },
+
+      clearCustomEvents: (options) => {
+        const sourceFilter = options?.source;
+        const metadataStore = useEventMetadataStore.getState();
+        metadataStore.clearCustomEventMetadata(
+          sourceFilter ? { source: sourceFilter } : undefined,
+        );
+
+        set((state) => {
+          const currentTemplates = state.customEventTemplates;
+          const nextTemplates = sourceFilter
+            ? currentTemplates.filter(
+                (template) =>
+                  metadataStore.metadataByEvent[template.id]?.source !==
+                  sourceFilter,
+              )
+            : [];
+
+          const baseEvents = state.events.filter(
+            (event) => !isCustomScheduleEventId(event.id),
+          );
+          const { metadataByEvent } = useEventMetadataStore.getState();
+          const regeneratedCustomEvents = expandCustomEventTemplates(
+            nextTemplates,
+            baseEvents,
+            metadataByEvent,
+          );
+
+          return {
+            customEventTemplates: nextTemplates,
+            events: [...baseEvents, ...regeneratedCustomEvents],
+          };
+        });
+      },
+
+      getCustomEventTemplates: () => {
+        const { customEventTemplates } = get();
+        return customEventTemplates;
+      },
+
+      deleteCustomEvent: (eventId) => {
+        const templateId = getCustomScheduleTemplateId(eventId);
+        if (!templateId) {
+          return;
+        }
+
+        set((state) => {
+          const nextTemplates = state.customEventTemplates.filter(
+            (template) => template.id !== templateId,
+          );
+          const baseEvents = state.events.filter(
+            (event) => !isCustomScheduleEventId(event.id),
+          );
+          const { metadataByEvent } = useEventMetadataStore.getState();
+          const regeneratedCustomEvents = expandCustomEventTemplates(
+            nextTemplates,
+            baseEvents,
+            metadataByEvent,
+          );
+
+          return {
+            customEventTemplates: nextTemplates,
+            events: [...baseEvents, ...regeneratedCustomEvents],
+          };
+        });
+
+        useEventMetadataStore
+          .getState()
+          .clearEventMetadataKeys(templateId, [
+            "source",
+            "name",
+            "location",
+            "color",
+            "time",
+          ]);
+      },
+    }),
+    {
+      name: "schedule-storage",
+      partialize: (state) => ({
+        icalCaches: state.icalCaches,
+        lastActiveCalendarId: state.lastActiveCalendarId,
+        customEventTemplates: state.customEventTemplates,
+        lastCreatedManualEventDefaults: state.lastCreatedManualEventDefaults,
+      }),
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<ScheduleState>;
+
+        const icalCaches: Record<string, ICalCache> = {};
+        if (persisted.icalCaches) {
+          Object.entries(persisted.icalCaches).forEach(([url, cache]) => {
+            icalCaches[url] = {
+              ...cache,
+              lastFetched: cache.lastFetched
+                ? new Date(cache.lastFetched)
+                : new Date(),
+              lastUpdated: cache.lastUpdated
+                ? new Date(cache.lastUpdated)
+                : null,
+            };
+          });
+        }
+
+        const customEventTemplates = (persisted.customEventTemplates || [])
+          .map((template): CustomEventTemplate | null => {
+            const id =
+              template.id ||
+              `${CUSTOM_EVENT_TEMPLATE_ID_PREFIX}${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            if (!isCustomScheduleEventId(id)) {
+              return null;
+            }
+            return {
+              id,
+              createdAtIso: template.createdAtIso || new Date().toISOString(),
+            };
+          })
+          .filter(
+            (template): template is CustomEventTemplate => template !== null,
+          );
+
+        return {
+          ...currentState,
+          ...persisted,
+          icalCaches,
+          customEventTemplates,
+          lastCreatedManualEventDefaults:
+            persisted.lastCreatedManualEventDefaults ?? null,
+        };
+      },
+    },
+  ),
+);
+
+export type { ScheduleState };
