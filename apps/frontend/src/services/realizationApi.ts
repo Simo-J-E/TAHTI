@@ -99,7 +99,9 @@ export class RealizationApiService {
       if (error instanceof Error) {
         throw error;
       } else {
-        throw new Error("Tuntematon virhe haettaessa toteutustietoja");
+        throw new Error("Tuntematon virhe haettaessa toteutustietoja", {
+          cause: error,
+        });
       }
     }
   }
