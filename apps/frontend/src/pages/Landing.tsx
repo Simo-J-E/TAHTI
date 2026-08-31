@@ -156,7 +156,7 @@ export default function Landing() {
                       <p className="text-xs text-[var(--color-text-secondary)]">10:15–11:45</p>
                       <p className="font-bold text-[var(--color-text)]">{t("preview.software")}</p>
                     </div>
-                    <div className="rounded-lg border border-[var(--color-border-alpha-30)] px-3 py-2 opacity-80">
+                    <div className="rounded-lg border border-[var(--color-border-alpha-30)] px-3 py-2 bg-[var(--color-surface-secondary-alpha-20)]">
                       <p className="text-xs text-[var(--color-text-secondary)]">12:15–14:00</p>
                       <p className="font-bold text-[var(--color-text)]">{t("preview.math")}</p>
                     </div>
