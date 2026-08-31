@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { CalendarDialog } from "../components/CalendarDialog";
 import { ThemeDialog } from "../components/ThemeDialog";
+import { STYLE_MODE_OPTIONS, type StyleModeId } from "../constants/style-modes";
 import {
   Dialog,
   DialogContent,
@@ -299,6 +300,20 @@ export function useSettingsConfig(): SettingsConfig {
               ],
               onChange: (value) =>
                 setConfig({ appearance: value as "system" | "light" | "dark" }),
+            },
+          },
+          {
+            componentType: "select",
+            id: "style-mode-selector",
+            data: {
+              label: t("sections.styling.styleMode.label"),
+              subtitle: t("sections.styling.styleMode.subtitle"),
+              value: config.styleMode,
+              options: STYLE_MODE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: t(option.labelKey),
+              })),
+              onChange: (value) => setConfig({ styleMode: value as StyleModeId }),
             },
           },
           {

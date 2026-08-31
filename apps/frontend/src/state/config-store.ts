@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { PRESET_CALENDARS } from "../lib/preset-calendars";
+import { isStyleModeId, type StyleModeId } from "../constants/style-modes";
 import { FONT_OPTIONS, type Font } from "../types/config";
 import { isAppearancePreference, type AppearancePreference } from "../utils/appearance";
 
@@ -299,10 +300,18 @@ const sanitizeFontId = (fontId?: string): Font => {
   return fontId;
 };
 
+const sanitizeStyleMode = (styleMode?: string): StyleModeId => {
+  if (!styleMode || !isStyleModeId(styleMode)) {
+    return "tahti";
+  }
+  return styleMode;
+};
+
 interface Config {
   font: Font;
   theme: string;
   appearance: AppearancePreference;
+  styleMode: StyleModeId;
   showWeekends: boolean;
   allowCustomEvents: boolean;
   hiddenEventOpacity: number;
@@ -333,6 +342,7 @@ const defaultConfig: Config = {
   font: "system",
   theme: "muted-coral",
   appearance: "system",
+  styleMode: "tahti",
   showWeekends: false,
   allowCustomEvents: true,
   hiddenEventOpacity: 25,
@@ -394,6 +404,7 @@ const mergeConfigWithDefaults = (config?: Partial<Config>): Config => {
   mergedConfig.appearance = isAppearancePreference(mergedConfig.appearance)
     ? mergedConfig.appearance
     : "system";
+  mergedConfig.styleMode = sanitizeStyleMode(mergedConfig.styleMode);
 
   return mergedConfig;
 };
@@ -441,7 +452,7 @@ const useConfigStore = create<ConfigState>()(
     }),
     {
       name: "app-config",
-      version: 5,
+      version: 6,
       migrate: (persistedState: unknown, version: number) => {
         const state = persistedState as
           | { config?: Record<string, unknown> }
@@ -478,6 +489,13 @@ const useConfigStore = create<ConfigState>()(
           state.config = {
             ...state.config,
             appearance: "system",
+          };
+        }
+
+        if (version < 6 && state?.config) {
+          state.config = {
+            ...state.config,
+            styleMode: "tahti",
           };
         }
 

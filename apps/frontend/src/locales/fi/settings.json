@@ -95,6 +95,19 @@
           "light": "Vaalea",
           "dark": "Tumma"
         }
+      },
+      "styleMode": {
+        "label": "Ulkoasun tyyli",
+        "subtitle": "Vaihda koko käyttöliittymän tunnelmaa, ei vain värejä",
+        "options": {
+          "tahti": "TAHTI",
+          "wilma": "Wilma-tyyli",
+          "futuristic": "Futuristinen",
+          "oldschool": "Old school web",
+          "cartoon": "Piirretty",
+          "animated": "Animoitu",
+          "focus": "Focus"
+        }
       }
     },
     "language": {

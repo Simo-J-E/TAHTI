@@ -199,5 +199,28 @@
       "invalid": "Anna kelvollinen URL-osoite",
       "mustBeTurkuAmk": "URL:n tulee olla Turku AMK:n kalenterijärjestelmästä"
     }
+  },
+  "rhythm": {
+    "sectionLabel": "Päivän yhteenveto",
+    "today": "Tänään",
+    "now": "Nyt menossa",
+    "next": "Seuraavaksi",
+    "emptyHeadline": "Vapaata",
+    "noEvents": "Ei tapahtumia tälle päivälle.",
+    "dayDone": "Päivän tunnit ovat jo ohi.",
+    "noMoreAfterCurrent": "Nykyisen tunnin jälkeen ei ole enää muita tapahtumia.",
+    "startsIn": "Alkaa {{duration}} kuluttua",
+    "freeAfter": "Vapaata {{duration}} ennen klo {{time}}",
+    "firstClass": "Päivä alkaa",
+    "summary": "Yhteenveto",
+    "eventCount": "{{count}} tapahtumaa",
+    "totalTime": "Yhteensä {{duration}}",
+    "dayEnds": "Päivä loppuu",
+    "restDay": "Lepopäivä",
+    "duration": {
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   }
 }

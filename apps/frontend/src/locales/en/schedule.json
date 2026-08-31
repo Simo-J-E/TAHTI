@@ -199,5 +199,28 @@
       "invalid": "Please enter a valid URL",
       "mustBeTurkuAmk": "URL must be from Turku AMK calendar system"
     }
+  },
+  "rhythm": {
+    "sectionLabel": "Day summary",
+    "today": "Today",
+    "now": "Happening now",
+    "next": "Up next",
+    "emptyHeadline": "Free time",
+    "noEvents": "No events scheduled for this day.",
+    "dayDone": "You are done for the day.",
+    "noMoreAfterCurrent": "No more events after the current one.",
+    "startsIn": "Starts in {{duration}}",
+    "freeAfter": "Free for {{duration}} before {{time}}",
+    "firstClass": "First class",
+    "summary": "Summary",
+    "eventCount": "{{count}} events",
+    "totalTime": "{{duration}} total",
+    "dayEnds": "Day ends",
+    "restDay": "Rest day",
+    "duration": {
+      "minutes": "{{minutes}} min",
+      "hours": "{{hours}} h",
+      "hoursMinutes": "{{hours}} h {{minutes}} min"
+    }
   }
 }

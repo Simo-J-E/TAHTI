@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import CreateEventDialog from "@/components/CreateEventDialog";
+import { ScheduleRhythmPanel } from "@/components/ScheduleRhythmPanel";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { Button } from "@/components/ui/button";
 import { MonthView, ScheduleDay, WeekView } from "../components/schedule";
@@ -228,19 +229,23 @@ export default function Schedule() {
     }
   }, [error, clearError, t]);
 
-  // Get events for the current date (only for day view)
-  const currentEvents = useMemo(() => {
-    if (viewMode !== "day") {
-      return [];
-    }
-
+    const selectedDateEvents = useMemo(() => {
     const dayEvents = getEventsForDate(currentDate);
     if (config.allowCustomEvents) {
       return dayEvents;
     }
 
     return dayEvents.filter((event) => !event.id.startsWith("meow-"));
-  }, [viewMode, getEventsForDate, currentDate, config.allowCustomEvents]);
+  }, [getEventsForDate, currentDate, config.allowCustomEvents]);
+
+  // Get events for the current date (only for day view)
+  const currentEvents = useMemo(() => {
+    if (viewMode !== "day") {
+      return [];
+    }
+
+    return selectedDateEvents;
+  }, [viewMode, selectedDateEvents]);
   const isWeekView = viewMode === "week";
   const isMonthView = viewMode === "month";
   const viewKey = isMonthView
@@ -376,19 +381,35 @@ export default function Schedule() {
       }
 
       // Handle navigation based on view mode
-      switch (event.key) {
-        case "ArrowLeft":
+      switch (event.key.toLowerCase()) {
+        case "arrowleft":
           event.preventDefault();
           handleSwipe("right"); // Left arrow goes to previous
           break;
-        case "ArrowRight":
+        case "arrowright":
           event.preventDefault();
           handleSwipe("left"); // Right arrow goes to next
           break;
-        case "ArrowUp":
-        case "ArrowDown":
+        case "arrowup":
+        case "arrowdown":
           event.preventDefault();
           rotateViewMode(event.key === "ArrowUp" ? "backward" : "forward");
+          break;
+        case "t":
+          event.preventDefault();
+          setDateParam(null);
+          break;
+        case "d":
+          event.preventDefault();
+          setViewMode("day");
+          break;
+        case "w":
+          event.preventDefault();
+          setViewMode("week");
+          break;
+        case "m":
+          event.preventDefault();
+          setViewMode("month");
           break;
       }
     };
@@ -400,7 +421,7 @@ export default function Schedule() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [handleSwipe, rotateViewMode]);
+  }, [handleSwipe, rotateViewMode, setDateParam, setViewMode]);
 
   if (isOnboardingActive) {
     return (
@@ -444,7 +465,7 @@ export default function Schedule() {
 
       {/* Navigation Buttons - Fixed at top */}
       <div
-        className="flex flex-col border-b"
+        className="style-surface flex flex-col border-b"
         style={{
           backgroundColor: "var(--color-surface-alpha-40)",
           borderColor: "var(--color-border-alpha-30)",
@@ -582,6 +603,11 @@ export default function Schedule() {
           </div>
         </div>
       </div>
+
+      <ScheduleRhythmPanel
+        date={currentDate}
+        events={selectedDateEvents}
+      />
 
       {/* Swipeable Schedule Container */}
       <div className="flex-1 relative">

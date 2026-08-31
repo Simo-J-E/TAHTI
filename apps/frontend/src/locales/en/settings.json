@@ -95,6 +95,19 @@
           "light": "Light",
           "dark": "Dark"
         }
+      },
+      "styleMode": {
+        "label": "Interface style",
+        "subtitle": "Change the overall vibe, not just the colors",
+        "options": {
+          "tahti": "TAHTI",
+          "wilma": "Wilma style",
+          "futuristic": "Futuristic",
+          "oldschool": "Old-school web",
+          "cartoon": "Cartoon",
+          "animated": "Animated",
+          "focus": "Focus"
+        }
       }
     },
     "language": {

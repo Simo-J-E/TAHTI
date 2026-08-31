@@ -33,5 +33,33 @@
     "title": "Built for the timetable",
     "p1": "TAHTI is a redesigned version of the existing open timetable application. It keeps the working calendar integrations, custom events and local preferences instead of replacing the data layer.",
     "p2": "The interface is designed to stay useful on phones, tablets and desktops and to remain understandable without relying on color alone."
+  },
+  "styles": {
+    "title": "Pick a style",
+    "subtitle": "TAHTI can have multiple personalities. Switch between them in settings and use the one that fits your mood best.",
+    "wilma": {
+      "title": "Wilma style",
+      "text": "Clear and familiar school-software styling that puts information first."
+    },
+    "futuristic": {
+      "title": "Futuristic",
+      "text": "Glow, glass and a more modern interface mood."
+    },
+    "oldschool": {
+      "title": "Old-school web",
+      "text": "A playful 90s web vibe with stronger borders and louder layout choices."
+    },
+    "cartoon": {
+      "title": "Cartoon",
+      "text": "Soft, playful and more personal for everyday use."
+    },
+    "animated": {
+      "title": "Animated",
+      "text": "Small motion details that make the interface feel more alive without becoming messy."
+    },
+    "focus": {
+      "title": "Focus",
+      "text": "A calm mode that keeps your attention on lessons, gaps and tasks."
+    }
   }
 }

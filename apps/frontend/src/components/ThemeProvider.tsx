@@ -13,12 +13,14 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const currentThemeId = useConfigStore((state) => state.config.theme);
   const currentFontId = useConfigStore((state) => state.config.font);
+  const currentStyleMode = useConfigStore((state) => state.config.styleMode);
   const appearance = useConfigStore((state) => state.config.appearance) as AppearancePreference;
 
   useEffect(() => {
     document.documentElement.dataset.theme = currentThemeId;
     document.documentElement.dataset.font = currentFontId;
-  }, [currentThemeId, currentFontId]);
+    document.documentElement.dataset.styleMode = currentStyleMode;
+  }, [currentThemeId, currentFontId, currentStyleMode]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");

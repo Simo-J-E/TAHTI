@@ -33,5 +33,33 @@
     "title": "Tehty lukujärjestystä varten",
     "p1": "TAHTI on nykyisen avoimen lukujärjestyssovelluksen uudistettu versio. Toimivat kalenteri-integraatiot, omat tapahtumat ja paikalliset asetukset säilyvät eikä datakerrosta korvata.",
     "p2": "Käyttöliittymä on suunniteltu toimimaan puhelimella, tabletilla ja työpöydällä sekä pysymään ymmärrettävänä ilman pelkkään väriin perustuvaa tietoa."
+  },
+  "styles": {
+    "title": "Valitse tyyli",
+    "subtitle": "TAHTI:ssa voi olla useita täysin eri tunnelmia. Voit vaihtaa ne asetuksista juuri sellaisiksi kuin haluat.",
+    "wilma": {
+      "title": "Wilma-tyyli",
+      "text": "Selkeä ja tuttu koulumainen näkymä, jossa tieto on pääosassa."
+    },
+    "futuristic": {
+      "title": "Futuristinen",
+      "text": "Hehkua, lasimaisuutta ja moderni käyttöliittymätunnelma."
+    },
+    "oldschool": {
+      "title": "Old school web",
+      "text": "90-luvun nettisivujen fiilis, vahvat rajat ja rohkea asettelu."
+    },
+    "cartoon": {
+      "title": "Piirretty",
+      "text": "Pehmeä, leikkisä ja persoonallinen ilme päivittäiseen käyttöön."
+    },
+    "animated": {
+      "title": "Animoitu",
+      "text": "Kevyttä liikettä ja eläväisempi käyttökokemus ilman turhaa sekavuutta."
+    },
+    "focus": {
+      "title": "Focus",
+      "text": "Mahdollisimman rauhallinen tila, jossa huomio pysyy tunneissa ja tehtävissä."
+    }
   }
 }

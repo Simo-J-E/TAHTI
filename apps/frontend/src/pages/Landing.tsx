@@ -1,4 +1,10 @@
-import { ArrowRight, Languages, MoonStar, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  Languages,
+  MoonStar,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import LanguageSelector from "../components/LanguageSelector";
@@ -7,6 +13,15 @@ const demoEvents = [
   { time: "08:00–10:00", titleKey: "preview.software", room: "ICT-City · Lambda" },
   { time: "12:00–14:00", titleKey: "preview.math", room: "EduCity" },
   { time: "15:00–16:30", titleKey: "preview.project", room: "ICT-City" },
+] as const;
+
+const previewStyles = [
+  { id: "wilma", accentClass: "bg-sky-500", titleKey: "styles.wilma.title", textKey: "styles.wilma.text" },
+  { id: "futuristic", accentClass: "bg-cyan-400", titleKey: "styles.futuristic.title", textKey: "styles.futuristic.text" },
+  { id: "oldschool", accentClass: "bg-amber-400", titleKey: "styles.oldschool.title", textKey: "styles.oldschool.text" },
+  { id: "cartoon", accentClass: "bg-pink-400", titleKey: "styles.cartoon.title", textKey: "styles.cartoon.text" },
+  { id: "animated", accentClass: "bg-emerald-400", titleKey: "styles.animated.title", textKey: "styles.animated.text" },
+  { id: "focus", accentClass: "bg-violet-400", titleKey: "styles.focus.title", textKey: "styles.focus.text" },
 ] as const;
 
 export default function Landing() {
@@ -40,7 +55,7 @@ export default function Landing() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 to="/app"
-                className="inline-flex min-h-11 items-center gap-2 rounded-[var(--tahti-radius-sm)] bg-[var(--color-accent)] px-5 py-3 font-bold text-[var(--color-accent-text)] transition-[filter] hover:brightness-95"
+                className="style-cta inline-flex min-h-11 items-center gap-2 rounded-[var(--tahti-radius-sm)] bg-[var(--color-accent)] px-5 py-3 font-bold text-[var(--color-accent-text)] transition-[filter] hover:brightness-95"
               >
                 {t("hero.cta")}
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />
@@ -50,7 +65,7 @@ export default function Landing() {
           </div>
 
           <section
-            className="overflow-hidden rounded-[var(--tahti-radius-lg)] border border-[var(--color-border-alpha-50)] bg-[var(--color-surface)] shadow-[0_16px_50px_rgba(0,0,0,0.12)]"
+            className="style-surface overflow-hidden rounded-[var(--tahti-radius-lg)] border border-[var(--color-border-alpha-50)] bg-[var(--color-surface)] shadow-[0_16px_50px_rgba(0,0,0,0.12)]"
             aria-label={t("preview.label")}
           >
             <div className="flex items-center justify-between border-b border-[var(--color-border-alpha-30)] px-4 py-3 sm:px-5">
@@ -118,6 +133,42 @@ export default function Landing() {
         </section>
 
         <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <div className="flex items-center gap-2 text-[var(--color-accent)]">
+            <Sparkles className="h-5 w-5" />
+            <h2 className="text-xl font-bold">{t("styles.title")}</h2>
+          </div>
+          <p className="mt-3 max-w-3xl leading-7 text-[var(--color-text-secondary)]">{t("styles.subtitle")}</p>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {previewStyles.map((style) => (
+              <article key={style.id} className={`style-surface style-preview-card style-preview-${style.id} rounded-2xl border border-[var(--color-border-alpha-30)] p-4`}>
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-base font-bold text-[var(--color-text)]">{t(style.titleKey)}</h3>
+                  <span className={`h-3 w-3 rounded-full ${style.accentClass}`} />
+                </div>
+                <div className="mt-4 rounded-xl border border-[var(--color-border-alpha-30)] p-3">
+                  <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-text-secondary)]">
+                    <span>TAHTI</span>
+                    <span>09:41</span>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    <div className="rounded-lg border border-[var(--color-border-alpha-30)] px-3 py-2">
+                      <p className="text-xs text-[var(--color-text-secondary)]">10:15–11:45</p>
+                      <p className="font-bold text-[var(--color-text)]">{t("preview.software")}</p>
+                    </div>
+                    <div className="rounded-lg border border-[var(--color-border-alpha-30)] px-3 py-2 opacity-80">
+                      <p className="text-xs text-[var(--color-text-secondary)]">12:15–14:00</p>
+                      <p className="font-bold text-[var(--color-text)]">{t("preview.math")}</p>
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm leading-6 text-[var(--color-text-secondary)]">{t(style.textKey)}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
           <h2 className="text-xl font-bold">{t("about.title")}</h2>
           <p className="mt-3 max-w-3xl leading-7 text-[var(--color-text-secondary)]">{t("about.p1")}</p>
           <p className="mt-2 max-w-3xl leading-7 text-[var(--color-text-secondary)]">{t("about.p2")}</p>
