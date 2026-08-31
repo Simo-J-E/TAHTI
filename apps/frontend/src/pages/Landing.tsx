@@ -40,7 +40,7 @@ export default function Landing() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
                 to="/app"
-                className="inline-flex min-h-11 items-center gap-2 rounded-[var(--tahti-radius-sm)] bg-[var(--color-accent)] px-5 py-3 font-bold text-[#211b1a] transition-[filter] hover:brightness-95"
+                className="inline-flex min-h-11 items-center gap-2 rounded-[var(--tahti-radius-sm)] bg-[var(--color-accent)] px-5 py-3 font-bold text-[var(--color-accent-text)] transition-[filter] hover:brightness-95"
               >
                 {t("hero.cta")}
                 <ArrowRight aria-hidden="true" className="h-4 w-4" />

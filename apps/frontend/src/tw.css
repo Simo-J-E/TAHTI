@@ -66,7 +66,7 @@
   --popover: var(--color-surface);
   --popover-foreground: var(--color-text);
   --primary: var(--color-accent);
-  --primary-foreground: rgb(255, 255, 255);
+  --primary-foreground: var(--color-accent-text);
   --secondary: var(--color-surface-secondary);
   --secondary-foreground: var(--color-text);
   --muted: var(--color-surface-secondary);
@@ -160,6 +160,7 @@
   --color-text-secondary: rgb(167, 177, 211);
   --color-accent: rgb(104, 125, 255);
   --color-accent-secondary: rgb(84, 103, 232);
+  --color-accent-text: rgb(0, 0, 0);
   --color-success: rgb(34, 197, 94);
   --color-warning: rgb(245, 158, 11);
   --color-error: rgb(239, 68, 68);
@@ -268,6 +269,7 @@
   --color-text-secondary: rgb(201, 170, 164);
   --color-accent: rgb(183, 78, 60);
   --color-accent-secondary: rgb(154, 58, 43);
+  --color-accent-text: rgb(255, 255, 255);
   --color-success: rgb(34, 197, 94);
   --color-warning: rgb(245, 158, 11);
   --color-error: rgb(239, 68, 68);
